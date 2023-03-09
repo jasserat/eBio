@@ -1,14 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const Role = {
-    values: ['admin', 'user', 'farmer', 'delivrer', 'customer'],
-    message: '{VALUE} is not a valid role'
-};
+const Role = ['admin', 'user', 'farmer', 'deliverer', 'customer']
 
-const genderType = {
-    values: ['male', 'female']
-};
+
+const genderType = ['male', 'female']
+
 
 var User = new Schema({
     firstName: {type: String, required: true, unique: false},
@@ -17,15 +14,17 @@ var User = new Schema({
     password: {type: String, required: true, unique: false},
     phoneNumber: {type: Number, required: true, unique: false},
     cin: {type: Number, required: true, unique: true},
-    image: {type: String, required: true, unique: false},
-    role: {type: Role, required: true, unique: false},
+    image: {type: String, unique: false},
+    role: {type: String,enum:Role , unique: false, default: 'user'},
     address: {type: String, required: true, unique: false},
-    location: {type: String, required: true, unique: false},
-    dateOfBirth: {type: Date, required: true, unique: false},        
-    height: {type: Number, required: true, unique: false},
-    weight: {type: Number, required: true, unique: false},
-    points: {type: Number, required: true, unique: false},
-    gender: {type: genderType, required: true, unique: false}
+    location: {type: String,  unique: false},
+    dateOfBirth: {type: Date,  unique: false},        
+    height: {type: Number, unique: false},
+    weight: {type: Number, unique: false},
+    points: {type: Number, unique: false},
+    gender: {type: String,enum:genderType, required: true, unique: false},
+    is_active: { type: Boolean, default: false },
+    activation_code: { type: String }
 });
 
 module.exports = mongoose.model('users', User);
