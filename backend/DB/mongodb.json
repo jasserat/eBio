@@ -1,5 +1,6 @@
 {
     "mongo":{
-        "uri":"mongodb://127.0.0.1:27017/eBioDB"
+        "uri":"mongodb+srv://ahmedbenguebila:ahmed2000@cluster0.2dwdyr1.mongodb.net/node-auth"
+        
     }
 }

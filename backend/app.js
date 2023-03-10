@@ -28,6 +28,6 @@ app.use((req, res, next)=>{
 });
 
 mongoose.set('strictQuery', true);
-mongoose.connect(process.env.URI);
+mongoose.connect(dbConfig.mongo.uri);
 
 module.exports = app;

@@ -24,7 +24,13 @@ var User = new Schema({
     points: {type: Number, unique: false},
     gender: {type: String,enum:genderType, required: true, unique: false},
     is_active: { type: Boolean, default: false },
-    activation_code: { type: String }
+    activation_code: { type: String },
+    isAuthorized: {
+        type: Boolean,
+        default: function () {
+          return this.role === 'user';
+        }
+      }
 });
 
 module.exports = mongoose.model('users', User);
