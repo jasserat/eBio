@@ -93,6 +93,48 @@ module.exports.verifyMail = async (req, res) => {
   }
 }
 
+// consult profile 
+
+module.exports.getUserById= async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) 
+    res.status(400).json({ message: 'User not found' });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ message: `Could not get user profile: ${error.message}` });
+  }
+}
+
+//edit user profile 
+
+
+module.exports.editUserProfile= async(userId, updatedUser) =>{
+  try {
+    const user = await User.findById(userId);
+    if (!user) res.status(400).json({ message: 'User not found' });
+
+    // Update user properties with values from the updatedUser object
+    user.firstName = updatedUser.firstName || user.firstName;
+    user.lastName = updatedUser.lastName || user.lastName;
+    user.email = updatedUser.email || user.email;
+    user.phoneNumber = updatedUser.phoneNumber || user.phoneNumber;
+    user.cin = updatedUser.cin || user.cin;
+    user.image = updatedUser.image || user.image;
+    user.address = updatedUser.address || user.address;
+    user.location = updatedUser.location || user.location;
+    user.dateOfBirth = updatedUser.dateOfBirth || user.dateOfBirth;
+    user.height = updatedUser.height || user.height;
+    user.weight = updatedUser.weight || user.weight;
+    user.gender = updatedUser.gender || user.gender;
+
+    const savedUser = await user.save();
+    res.status(200).json(savedUser);
+  } catch (error) {
+    res.status(400).json({ message: `Could not edit user profile: ${error.message}` });
+  }
+}
+
 
 //ahmed ListUser / SearchUsers / TestAdmin / ActivationDeactivationAccount / ConfirmRole+Mail 
 
