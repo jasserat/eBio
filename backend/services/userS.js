@@ -228,6 +228,76 @@ module.exports.authorizeUser = async (req, res, next) => {
 
 }
 
+//reset password
+
+
+function makeid(length) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
+async function sendEmail(email, subject, text) {
+
+  //token
+
+  try {
+    // create reusable transporter object using the default SMTP transport
+    // let transporter = nodemailer.createTransport({
+    //     host: "smtp.gmail.com",
+    //     port: 465,
+    //     secure: true, // true for 465, false for other ports
+    //     auth: {
+    //         user: "**", // generated ethereal user
+    //         pass: "**", // generated ethereal password
+    //     },
+    // });
+
+    let mailOptions = {
+      from: '" eBio" <eBio.dev@gmail.com>', // sender address
+      to: email, // list of receivers
+      subject: subject, // Subject line
+      text: text, // plain text body
+    };
+
+    // Send the email
+    let info = await transporter.sendMail(mailOptions);
+    console.log("Message sent: "+info.messageId);
+
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+module.exports.resetPassword = (req, res) => {
+  const email = req.body.email
+
+  const code = makeid(6)
+  res.json("http://loclahost:3000/user/newPass/"+code)
+  sendEmail(email, "PASSWORD RESET", "To reset password please go to the link http://loclahost:3000/user/newPass/" + code)
+
+  //sendEmail(email,"PASSWORD RESET","c'est votre code"+code)
+
+  // res.json({received : "To reset password please go to the link http://loclahost:3000/user/newPass/"+ code})
+}
+
+module.exports.newPass =async (req, res) => {
+
+  const code = req.params.code
+  const userId = req.body.userId
+  const newPass = req.body.newPass
+
+  const user= await User.findByIdAndUpdate(userId, { password: newPass });
+  res.json(user);
+
+}
 
 
 

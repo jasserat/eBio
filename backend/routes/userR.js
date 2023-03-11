@@ -25,7 +25,9 @@ router.put('/activateAccount/:accountId', passport.authentification, userS.chang
 router.put('/authorizeUser/:accountId', passport.AdminAutorization, userS.authorizeUser);
 
 
-
+//reset password
+router.post('/resetPassword',userS.resetPassword)
+router.put('/newPass/:code',userS.newPass)
 
 
 module.exports = router;
