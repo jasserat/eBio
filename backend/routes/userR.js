@@ -17,12 +17,12 @@ router.get('/verifyMail/:accountId',userS.changeAtributeIsActive)
 router.get('/profile/:id', passport.authentification,async (req, res) => userS.getUserById(req.params.id)); // View user profile
 router.put('/:userId', passport.authentification,async(req,res) => userS.editUserProfile(req.params.userId,req.body)); // Edit user profile
 // ahmed
-router.get('/listUsers', userS.adminTest, userS.listUser);
-router.get('/userSearch', userS.adminTest, userS.userSearch);
-// passport.AdminAutorization 
-router.put('/deactivateAccount/:accountId', userS.adminTest, userS.changeAtributeIsActive);
-router.put('/activateAccount/:accountId', userS.adminTest, userS.changeAtributeIsActive);
-router.put('/authorizeUser/:accountId', userS.adminTest, userS.authorizeUser);
+router.get('/listUsers', passport.AdminAutorization, userS.listUser);
+router.get('/userSearch', passport.AdminAutorization, userS.userSearch);
+// ahmed passport.AdminAutorization 
+router.put('/deactivateAccount/:accountId', passport.authentification, userS.changeAtributeIsActive);
+router.put('/activateAccount/:accountId', passport.authentification, userS.changeAtributeIsActive);
+router.put('/authorizeUser/:accountId', passport.AdminAutorization, userS.authorizeUser);
 
 
 

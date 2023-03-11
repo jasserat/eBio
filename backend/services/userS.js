@@ -95,11 +95,11 @@ module.exports.verifyMail = async (req, res) => {
 
 // consult profile 
 
-module.exports.getUserById= async (userId) => {
+module.exports.getUserById = async (userId) => {
   try {
     const user = await User.findById(userId);
-    if (!user) 
-    res.status(400).json({ message: 'User not found' });
+    if (!user)
+      res.status(400).json({ message: 'User not found' });
     res.status(200).json(user);
   } catch (error) {
     res.status(400).json({ message: `Could not get user profile: ${error.message}` });
@@ -109,7 +109,7 @@ module.exports.getUserById= async (userId) => {
 //edit user profile 
 
 
-module.exports.editUserProfile= async(userId, updatedUser) =>{
+module.exports.editUserProfile = async (userId, updatedUser) => {
   try {
     const user = await User.findById(userId);
     if (!user) res.status(400).json({ message: 'User not found' });
@@ -134,7 +134,6 @@ module.exports.editUserProfile= async(userId, updatedUser) =>{
     res.status(400).json({ message: `Could not edit user profile: ${error.message}` });
   }
 }
-
 
 //ahmed ListUser / SearchUsers / TestAdmin / ActivationDeactivationAccount / ConfirmRole+Mail 
 
