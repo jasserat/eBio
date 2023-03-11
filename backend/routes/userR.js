@@ -29,6 +29,11 @@ router.put('/authorizeUser/:accountId', passport.AdminAutorization, userS.author
 router.post('/resetPassword',userS.resetPassword)
 router.put('/newPass/:code',userS.newPass)
 
+//login
+router.post('/login', userS.login_post);
+router.get('/logout', userS.logout_get);
+
+
 
 module.exports = router;
 

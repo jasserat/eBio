@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -8,8 +9,6 @@ const transporter = nodemailer.createTransport({
     pass: 'lzdgsvffzhpvldlu'
   }
 });
-
-
 
 // emna  Register / confirmation mail
 registerUser = async function registerUser(firstName, lastName, email, password, phoneNumber, cin, image, role, address, location, dateOfBirth, height, weight, points, gender) {
@@ -49,6 +48,110 @@ registerUser = async function registerUser(firstName, lastName, email, password,
   } catch (err) {
     throw new Error(err.message);
   }
+}
+
+//handle errors
+const handleErrors = (err) => {
+  console.log(err.message, err.code);
+  let errors = { email: '', password: '' };
+
+  //incorrect email
+  if (err.message === 'incorrect email') {
+      errors.email = 'that email is not registered';
+  }
+
+  //incorrect password
+  if (err.message === 'incorrect password') {
+      errors.password = 'that password is incorrect';
+  }
+
+  //duplicate error code
+  if (err.code === 11000) {
+      errors.email = 'that email is already registered';
+      return errors;
+  }
+
+  //validation errors
+  if (err.message.includes('user validation failed')) {
+      Object.values(err.errors).forEach(({ properties }) => {
+          errors[properties.path] = properties.message;
+      });
+  }
+
+  return errors;
+}
+
+//create json web token
+module.exports.requireAuth = (req, res, next) => {
+  const token = req.cookies.jwt;
+
+  //check json web token exists & is verified
+  if (token) {
+      jwt.verify(token, 'ebiotest secret', (err, decodedToken) => {
+          if (err) {
+              console.log(err.message);
+              res.redirect('/login');
+          } else {
+              console.log(decodedToken);
+              next();
+          }
+      });
+  }
+  else {
+      res.redirect('/login');
+  }
+}
+
+//check current user
+module.exports.checkUser = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (token) {
+      jwt.verify(token, 'ebiotest secret', async (err, decodedToken) => {
+          if (err) {
+              console.log(err.message);
+              res.locals.user = null;
+              next();
+          } else {
+              console.log(decodedToken);
+              let user = await User.findById(decodedToken.id);
+              res.locals.user = user;
+              next();
+          }
+      });
+  }
+  else {
+      res.locals.user = null;
+      next();
+  }
+}
+
+const maxAge = 3 * 24 * 60 * 60;
+const createToken = (id) => {
+  return jwt.sign({id}, 'ebiotest secret', {
+      expiresIn: maxAge
+  })
+}
+
+module.exports.login_post = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+      const user = await User.login(email, password);
+      const token = createToken(user._id);
+      res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+      res.status(200).json({token});
+  } catch (err) {
+      const errors = handleErrors(err);
+      res.status(400).json({errors});
+  }
+}
+
+module.exports.logout_get = (req, res) => {
+  
+  const cookie = res.cookie('jwt', '', { maxAge: 1 });
+  console.log(cookie);
+  res.json({message: "logged out"})
+  //res.redirect('/');
 }
 
 sendVerificationMail = function sendVerificationMail(firstName, lastName, fullUrl, email, activation_code, transporter) {
