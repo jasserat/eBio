@@ -29,10 +29,13 @@ router.put('/authorizeUser/:accountId', passport.AdminAutorization, userS.author
 router.post('/resetPassword',userS.resetPassword)
 router.put('/newPass/:code',userS.newPass)
 
+//Jasser
 //login
 router.post('/login', userS.login_post);
-router.get('/logout', userS.logout_get);
-
+//logout
+router.get('/logout',userS.requireAuth, userS.logout_get);
+//delete user
+router.delete('/deleteUser/:id',userS.requireAuthAndAdmin , userS.deleteUser);
 
 
 module.exports = router;

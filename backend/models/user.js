@@ -98,7 +98,7 @@ var User = new Schema({
       }
 });
 
-//static method to login user
+//jasser static method to login user
 User.statics.login = async function(email, password) {
   const user = await this.findOne({ email: email });
   if (user) {

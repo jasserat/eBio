@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+
 // emna  Register / confirmation mail
 registerUser = async function registerUser(firstName, lastName, email, password, phoneNumber, cin, image, role, address, location, dateOfBirth, height, weight, points, gender) {
   try {
@@ -50,7 +51,7 @@ registerUser = async function registerUser(firstName, lastName, email, password,
   }
 }
 
-//handle errors
+//jasser handle errors
 const handleErrors = (err) => {
   console.log(err.message, err.code);
   let errors = { email: '', password: '' };
@@ -81,13 +82,13 @@ const handleErrors = (err) => {
   return errors;
 }
 
-//create json web token
+//jasser auth middleware
 module.exports.requireAuth = (req, res, next) => {
   const token = req.cookies.jwt;
 
   //check json web token exists & is verified
   if (token) {
-      jwt.verify(token, 'ebiotest secret', (err, decodedToken) => {
+      jwt.verify(token, 'ebio secret', (err, decodedToken) => {
           if (err) {
               console.log(err.message);
               res.redirect('/login');
@@ -102,11 +103,38 @@ module.exports.requireAuth = (req, res, next) => {
   }
 }
 
-//check current user
+//jasser check if user is admin
+module.exports.requireAuthAndAdmin = (req, res, next) => {
+  const token = req.cookies.jwt;
+  //check json web token exists & is verified
+  if (token) {
+      jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+        let user = await User.findById(decodedToken.id);
+        console.log(user.role)
+        if (err) {
+            console.log(err.message);
+            res.redirect('/login');
+        } else {
+            if(user.role === "admin"){
+              console.log(decodedToken);
+              next();
+            }
+            else{
+              res.redirect('/login');
+            }
+        }
+      });
+  }
+  else {
+      res.redirect('/login');
+  }
+}
+
+//jasser check current user
 module.exports.checkUser = (req, res, next) => {
   const token = req.cookies.jwt;
   if (token) {
-      jwt.verify(token, 'ebiotest secret', async (err, decodedToken) => {
+      jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
           if (err) {
               console.log(err.message);
               res.locals.user = null;
@@ -125,13 +153,15 @@ module.exports.checkUser = (req, res, next) => {
   }
 }
 
+//jasser create token
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({id}, 'ebiotest secret', {
+  return jwt.sign({id}, 'ebio secret', {
       expiresIn: maxAge
   })
 }
 
+//jasser login
 module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
 
@@ -139,19 +169,64 @@ module.exports.login_post = async (req, res) => {
       const user = await User.login(email, password);
       const token = createToken(user._id);
       res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-      res.status(200).json({token});
+      res.status(200).json({user: user._id});
   } catch (err) {
       const errors = handleErrors(err);
       res.status(400).json({errors});
   }
 }
 
+//jasser logout
 module.exports.logout_get = (req, res) => {
   
-  const cookie = res.cookie('jwt', '', { maxAge: 1 });
-  console.log(cookie);
+  res.cookie('jwt', '', { maxAge: 1 });
   res.json({message: "logged out"})
   //res.redirect('/');
+}
+
+// jasser delete user
+module.exports.deleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+      const user = await User.findByIdAndDelete(id);
+      res.status(200).json({message: "user deleted"});
+  } catch (err) {
+      res.status(400).json({message: "error deleting user"});
+  }
+}
+
+//jasser login with facebook
+module.exports.loginWithFacebook = async (req, res) => {
+  const { email, firstName, lastName, image } = req.body;
+  try {
+      const user = await User.findOne({ email });
+      if (user) {
+          const token = createToken(user._id);
+          res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+          res.status(200).json({user: user._id});
+      } else {
+          const newUser = new User({
+              firstName,
+              lastName,
+              email,
+              image,
+              role: "user",
+              address: "",
+              location: "",
+              dateOfBirth: "",
+              height: "",
+              weight: "",
+              points: 0,
+          });
+          const savedUser = await newUser.save();
+          const token = createToken(savedUser._id);
+          res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+          res.status(200).json({user: savedUser._id});
+      }
+  } catch (err) {
+      const errors = handleErrors(err);
+      res.status(400).json({errors});
+  }
 }
 
 sendVerificationMail = function sendVerificationMail(firstName, lastName, fullUrl, email, activation_code, transporter) {
