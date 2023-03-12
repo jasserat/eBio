@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 //git pull origin master
 //git checkout -m branch
 //git push branch
-
+//test
 
 
 // emna  Register / confirmation mail
