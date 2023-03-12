@@ -198,9 +198,11 @@ module.exports.verifyMail = async (req, res) => {
 
 // consult profile 
 
-module.exports.getUserById = async (userId) => {
+module.exports.getUserById = async (req,res) => {
   try {
-    const user = await User.findById(userId);
+    console.log(req.params.userId);
+    const user = await User.findById(req.params.id);
+    console.log(user);
     if (!user)
       res.status(400).json({ message: 'User not found' });
     res.status(200).json(user);
@@ -212,9 +214,10 @@ module.exports.getUserById = async (userId) => {
 //edit user profile 
 
 
-module.exports.editUserProfile = async (userId, updatedUser) => {
+module.exports.editUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(userId);
+    const updatedUser = req.body;
+    const user = await User.findById(req.params.userId);
     if (!user) res.status(400).json({ message: 'User not found' });
 
     // Update user properties with values from the updatedUser object

@@ -14,8 +14,8 @@ const transporter = nodemailer.createTransport({
 // emna
 router.post('/register',userS.verifyMail );
 router.get('/verifyMail/:accountId',userS.changeAtributeIsActive)
-router.get('/profile/:id', passport.authentification,async (req, res) => userS.getUserById(req.params.id)); // View user profile
-router.put('/:userId', passport.authentification,async(req,res) => userS.editUserProfile(req.params.userId,req.body)); // Edit user profile
+router.get('/profile/:id', passport.authentification,userS.getUserById); // View user profile
+router.put('/:userId', passport.authentification,userS.editUserProfile); // Edit user profile
 // ahmed
 router.get('/listUsers', passport.AdminAutorization, userS.listUser);
 router.get('/userSearch', passport.AdminAutorization, userS.userSearch);
