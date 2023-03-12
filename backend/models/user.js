@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
 
+
 const Role = ['admin', 'user', 'farmer', 'deliverer', 'customer']
 
 
@@ -93,9 +94,12 @@ var User = new Schema({
     isAuthorized: {
         type: Boolean,
         default: function () {
-          return this.role === 'user';
+          return !this.role === 'farmer' || !this.role==='deliverer';
         }
       }
+
+    
+
 });
 
 //jasser static method to login user

@@ -9,6 +9,10 @@ const transporter = nodemailer.createTransport({
     pass: 'lzdgsvffzhpvldlu'
   }
 });
+//git pull origin master
+//git checkout -m branch
+//git push branch
+
 
 
 // emna  Register / confirmation mail
@@ -58,25 +62,25 @@ const handleErrors = (err) => {
 
   //incorrect email
   if (err.message === 'incorrect email') {
-      errors.email = 'that email is not registered';
+    errors.email = 'that email is not registered';
   }
 
   //incorrect password
   if (err.message === 'incorrect password') {
-      errors.password = 'that password is incorrect';
+    errors.password = 'that password is incorrect';
   }
 
   //duplicate error code
   if (err.code === 11000) {
-      errors.email = 'that email is already registered';
-      return errors;
+    errors.email = 'that email is already registered';
+    return errors;
   }
 
   //validation errors
   if (err.message.includes('user validation failed')) {
-      Object.values(err.errors).forEach(({ properties }) => {
-          errors[properties.path] = properties.message;
-      });
+    Object.values(err.errors).forEach(({ properties }) => {
+      errors[properties.path] = properties.message;
+    });
   }
 
   return errors;
@@ -88,18 +92,18 @@ module.exports.requireAuth = (req, res, next) => {
 
   //check json web token exists & is verified
   if (token) {
-      jwt.verify(token, 'ebio secret', (err, decodedToken) => {
-          if (err) {
-              console.log(err.message);
-              res.redirect('/login');
-          } else {
-              console.log(decodedToken);
-              next();
-          }
-      });
+    jwt.verify(token, 'ebio secret', (err, decodedToken) => {
+      if (err) {
+        console.log(err.message);
+        res.redirect('/login');
+      } else {
+        console.log(decodedToken);
+        next();
+      }
+    });
   }
   else {
-      res.redirect('/login');
+    res.redirect('/login');
   }
 }
 
@@ -108,25 +112,25 @@ module.exports.requireAuthAndAdmin = (req, res, next) => {
   const token = req.cookies.jwt;
   //check json web token exists & is verified
   if (token) {
-      jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
-        let user = await User.findById(decodedToken.id);
-        console.log(user.role)
-        if (err) {
-            console.log(err.message);
-            res.redirect('/login');
-        } else {
-            if(user.role === "admin"){
-              console.log(decodedToken);
-              next();
-            }
-            else{
-              res.redirect('/login');
-            }
+    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+      let user = await User.findById(decodedToken.id);
+      console.log(user.role)
+      if (err) {
+        console.log(err.message);
+        res.redirect('/login');
+      } else {
+        if (user.role === "admin") {
+          console.log(decodedToken);
+          next();
         }
-      });
+        else {
+          res.redirect('/login');
+        }
+      }
+    });
   }
   else {
-      res.redirect('/login');
+    res.redirect('/login');
   }
 }
 
@@ -134,30 +138,30 @@ module.exports.requireAuthAndAdmin = (req, res, next) => {
 module.exports.checkUser = (req, res, next) => {
   const token = req.cookies.jwt;
   if (token) {
-      jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
-          if (err) {
-              console.log(err.message);
-              res.locals.user = null;
-              next();
-          } else {
-              console.log(decodedToken);
-              let user = await User.findById(decodedToken.id);
-              res.locals.user = user;
-              next();
-          }
-      });
+    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+      if (err) {
+        console.log(err.message);
+        res.locals.user = null;
+        next();
+      } else {
+        console.log(decodedToken);
+        let user = await User.findById(decodedToken.id);
+        res.locals.user = user;
+        next();
+      }
+    });
   }
   else {
-      res.locals.user = null;
-      next();
+    res.locals.user = null;
+    next();
   }
 }
 
 //jasser create token
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({id}, 'ebio secret', {
-      expiresIn: maxAge
+  return jwt.sign({ id }, 'ebio secret', {
+    expiresIn: maxAge
   })
 }
 
@@ -166,21 +170,21 @@ module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-      const user = await User.login(email, password);
-      const token = createToken(user._id);
-      res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-      res.status(200).json({user: user._id});
+    const user = await User.login(email, password);
+    const token = createToken(user._id);
+    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(200).json({ user: user._id });
   } catch (err) {
-      const errors = handleErrors(err);
-      res.status(400).json({errors});
+    const errors = handleErrors(err);
+    res.status(400).json({ errors });
   }
 }
 
 //jasser logout
 module.exports.logout_get = (req, res) => {
-  
+
   res.cookie('jwt', '', { maxAge: 1 });
-  res.json({message: "logged out"})
+  res.json({ message: "logged out" })
   //res.redirect('/');
 }
 
@@ -188,10 +192,10 @@ module.exports.logout_get = (req, res) => {
 module.exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-      const user = await User.findByIdAndDelete(id);
-      res.status(200).json({message: "user deleted"});
+    const user = await User.findByIdAndDelete(id);
+    res.status(200).json({ message: "user deleted" });
   } catch (err) {
-      res.status(400).json({message: "error deleting user"});
+    res.status(400).json({ message: "error deleting user" });
   }
 }
 
@@ -199,33 +203,33 @@ module.exports.deleteUser = async (req, res) => {
 module.exports.loginWithFacebook = async (req, res) => {
   const { email, firstName, lastName, image } = req.body;
   try {
-      const user = await User.findOne({ email });
-      if (user) {
-          const token = createToken(user._id);
-          res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-          res.status(200).json({user: user._id});
-      } else {
-          const newUser = new User({
-              firstName,
-              lastName,
-              email,
-              image,
-              role: "user",
-              address: "",
-              location: "",
-              dateOfBirth: "",
-              height: "",
-              weight: "",
-              points: 0,
-          });
-          const savedUser = await newUser.save();
-          const token = createToken(savedUser._id);
-          res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-          res.status(200).json({user: savedUser._id});
-      }
+    const user = await User.findOne({ email });
+    if (user) {
+      const token = createToken(user._id);
+      res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+      res.status(200).json({ user: user._id });
+    } else {
+      const newUser = new User({
+        firstName,
+        lastName,
+        email,
+        image,
+        role: "user",
+        address: "",
+        location: "",
+        dateOfBirth: "",
+        height: "",
+        weight: "",
+        points: 0,
+      });
+      const savedUser = await newUser.save();
+      const token = createToken(savedUser._id);
+      res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+      res.status(200).json({ user: savedUser._id });
+    }
   } catch (err) {
-      const errors = handleErrors(err);
-      res.status(400).json({errors});
+    const errors = handleErrors(err);
+    res.status(400).json({ errors });
   }
 }
 
@@ -354,16 +358,15 @@ module.exports.adminTest = function isAdmin(req, res, next) {
 }
 
 
-module.exports.changeAtributeIsActive = async (req, res, next) => {
+module.exports.activateAccount = async (req, res, next) => {
   const user = await User.findById(req.params.accountId);
   try {
-    if (user.is_active == true) {
-      const user = await User.findByIdAndUpdate(req.params.accountId, { is_active: false })
-      res.send('Account deactivated.')
+    if (user.is_active == false) {
+      const user = await User.findByIdAndUpdate(req.params.accountId, { is_active: true })
+      res.send('Account activated.you now have fully access to eBio page')
     }
     else {
-      await User.findByIdAndUpdate(req.params.accountId, { is_active: true })
-      res.send('Account activated.')
+      res.send('Your account is alraady activated')
     }
 
   } catch (err) {
@@ -371,39 +374,77 @@ module.exports.changeAtributeIsActive = async (req, res, next) => {
   }
 }
 
+module.exports.changeAtributeIsActive = async (req, res, next) => {
+  const token = req.cookies.jwt;
+  //check json web token exists & is verified
+  if (token) {
+    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+      let user = await User.findById(decodedToken.id);
+      if (err) {
+        console.log(err.message);
+      } else {
+
+        try {
+          if (user.is_active == true && (user.role === 'user' || user.role === 'deliverer' || user.role === 'deliverer')) {
+            await User.findByIdAndUpdate(decodedToken.id, { is_active: false })
+            res.send('Account deactivated.')
+          }
+          else if (user.is_active == false && (user.role === 'user' || user.role === 'deliverer' || user.role === 'deliverer')) {
+            var fullUrl = req.protocol + '://' + req.get('host') + '/user/verifyMail/' + user._id;
+            sendVerificationMail(user.firstName, user.lastName, fullUrl, user.email, user.activation_code, transporter);
+            res.send("Check your mail to reactivate you account")
+            //301 303 308
+
+          } else if (user.is_active == true && (user.role === 'admin')) {
+            res.send('As an admin ,your account can not be deactivated.')
+          }
+        } catch (err) {
+          res.status(500).json({ message: err.message });
+        }
+
+
+      }
+    })
+  }
+}
+
 
 module.exports.authorizeUser = async (req, res, next) => {
-  try {
-    const user = await User.findByIdAndUpdate(req.params.accountId, { isAuthorized: true })
-    var mailOptions = {
-      from: 'ebioapplication2222@gmail.com',
-      to: user.email,
-      subject: 'eBio! Authorization Mail',
-      text: 'Your account has been promoted to ' + user.role + ' !',
-      html: '<!DOCTYPE html>' +
-        '<html><head><title>VAuthorization Mail</title>' +
-        '</head><body><div>' +
-        '<p>Dear ' + user.firstName + ' ' + user.lastName + ',Your account has been successfully promoted to ' + user.role + ' status. Congratulations on this achievement! </p>' +
-        '<p>Regards,</p>' +
-        '<p>eBio support</p>' +
-
-        '</div></body></html>'
-    };
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
-    });
-
-    res.status(201).json({ message: 'Account has been authorized' })
-  } catch (err) {
-
-    res.status(500).json({ message: err.message });
-
+  const user = User.findById(req.params.accountId);
+  if (user == null) {
+    res.status(201).json({ message: 'Account not found' })
   }
+  else {
+    if (user.isAuthorized == true) {
+      res.status(201).json({ message: 'Account is already authorized' })
+    }
+    else {
+      const user = await User.findByIdAndUpdate(req.params.accountId, { isAuthorized: true })
+      var mailOptions = {
+        from: 'ebioapplication2222@gmail.com',
+        to: user.email,
+        subject: 'eBio! Authorization Mail',
+        text: 'Your account has been promoted to ' + user.role + ' !',
+        html: '<!DOCTYPE html>' +
+          '<html><head><title>VAuthorization Mail</title>' +
+          '</head><body><div>' +
+          '<p>Dear ' + user.firstName + ' ' + user.lastName + ',Your account has been successfully promoted to ' + user.role + ' status. Congratulations on this achievement! </p>' +
+          '<p>Regards,</p>' +
+          '<p>eBio support</p>' +
 
+          '</div></body></html>'
+      };
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+
+      res.status(201).json({ message: 'Account has been authorized' })
+    }
+  }
 }
 
 //reset password
@@ -446,7 +487,7 @@ async function sendEmail(email, subject, text) {
 
     // Send the email
     let info = await transporter.sendMail(mailOptions);
-    console.log("Message sent: "+info.messageId);
+    console.log("Message sent: " + info.messageId);
 
   } catch (error) {
     console.log(error)
@@ -458,7 +499,7 @@ module.exports.resetPassword = (req, res) => {
   const email = req.body.email
 
   const code = makeid(6)
-  res.json("http://loclahost:3000/user/newPass/"+code)
+  res.json("http://loclahost:3000/user/newPass/" + code)
   sendEmail(email, "PASSWORD RESET", "To reset password please go to the link http://loclahost:3000/user/newPass/" + code)
 
   //sendEmail(email,"PASSWORD RESET","c'est votre code"+code)
@@ -466,13 +507,13 @@ module.exports.resetPassword = (req, res) => {
   // res.json({received : "To reset password please go to the link http://loclahost:3000/user/newPass/"+ code})
 }
 
-module.exports.newPass =async (req, res) => {
+module.exports.newPass = async (req, res) => {
 
   const code = req.params.code
   const userId = req.body.userId
   const newPass = req.body.newPass
 
-  const user= await User.findByIdAndUpdate(userId, { password: newPass });
+  const user = await User.findByIdAndUpdate(userId, { password: newPass });
   res.json(user);
 
 }
