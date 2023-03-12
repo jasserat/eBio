@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userS = require('../services/userS');
 const nodemailer = require('nodemailer');
+const passport = require('../midlleware/passport');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -10,33 +11,32 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Register a new user
-router.post('/register', async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, phoneNumber,cin,image,role,address,location,dateOfBirth,height,weight,points,gender} = req.body;
-    const newUser = await userS.registerUser(firstName, lastName, email, password, phoneNumber,cin,image,role,address,location,dateOfBirth,height,weight,points,gender);
+// emna
+router.post('/register',userS.verifyMail );
+router.get('/verifyMail/:accountId',userS.changeAtributeIsActive)
+router.get('/profile/:id', passport.authentification,async (req, res) => userS.getUserById(req.params.id)); // View user profile
+router.put('/:userId', passport.authentification,async(req,res) => userS.editUserProfile(req.params.userId,req.body)); // Edit user profile
+// ahmed
+router.get('/listUsers', passport.AdminAutorization, userS.listUser);
+router.get('/userSearch', passport.AdminAutorization, userS.userSearch);
+// ahmed passport.AdminAutorization 
+router.put('/deactivateAccount/:accountId', passport.authentification, userS.changeAtributeIsActive);
+router.put('/activateAccount/:accountId', passport.authentification, userS.changeAtributeIsActive);
+router.put('/authorizeUser/:accountId', passport.AdminAutorization, userS.authorizeUser);
 
-    // Send verification email
 
+//reset password
+router.post('/resetPassword',userS.resetPassword)
+router.put('/newPass/:code',userS.newPass)
 
-    const activation_code = newUser.activation_code;
-    var fullUrl = req.protocol + '://' + req.get('host') + '/user/verifyMail/' + newUser._id;
-    userS.sendVerificationMail(firstName, lastName, fullUrl, email, activation_code, transporter);
+//Jasser
+//login
+router.post('/login', userS.login_post);
+//logout
+router.get('/logout',userS.requireAuth, userS.logout_get);
+//delete user
+router.delete('/deleteUser/:id',userS.requireAuthAndAdmin , userS.deleteUser);
 
-    res.status(201).json(newUser);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-router.get('/verifyMail/:id',async(req,res)=>{
-  try {
-  const result=await userS.verifyMailById(req.params.id);
-  res.status(201).json("eBio :Your account is now activated ! Welcome");
-} catch (err) {
-  res.status(400).json({ message: err.message });
-}
-})
 
 module.exports = router;
 

@@ -4,6 +4,7 @@ const createError = require('http-errors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const dbConfig = require('./DB/mongodb.json');
+const cookieParser = require('cookie-parser');
 
 const cxpFormRouter = require('./routes/cxpFormR');
 const orderRouter = require('./routes/orderR');
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 //app.use('/cxpForm', cxpFormRouter);
@@ -28,6 +30,6 @@ app.use((req, res, next)=>{
 });
 
 mongoose.set('strictQuery', true);
-mongoose.connect(process.env.URI);
+mongoose.connect(dbConfig.mongo.uri);
 
 module.exports = app;
