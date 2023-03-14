@@ -9,6 +9,9 @@ const transporter = nodemailer.createTransport({
     pass: "lzdgsvffzhpvldlu",
   },
 });
+//git pull origin master
+//git checkout -m branch
+//git push branch
 
 // emna  Register / confirmation mail
 registerUser = async function registerUser(
@@ -107,7 +110,7 @@ module.exports.requireAuth = (req, res, next) => {
 
   //check json web token exists & is verified
   if (token) {
-    jwt.verify(token, "ebio secret", (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, (err, decodedToken) => {
       if (err) {
         console.log(err.message);
         res.redirect("/login");
@@ -126,7 +129,7 @@ module.exports.requireAuthAndAdmin = (req, res, next) => {
   const token = req.cookies.jwt;
   //check json web token exists & is verified
   if (token) {
-    jwt.verify(token, "ebio secret", async (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, async (err, decodedToken) => {
       let user = await User.findById(decodedToken.id);
       console.log(user.role);
       if (err) {
@@ -150,7 +153,7 @@ module.exports.requireAuthAndAdmin = (req, res, next) => {
 module.exports.checkUser = (req, res, next) => {
   const token = req.cookies.jwt;
   if (token) {
-    jwt.verify(token, "ebio secret", async (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, async (err, decodedToken) => {
       if (err) {
         console.log(err.message);
         res.locals.user = null;
@@ -169,10 +172,9 @@ module.exports.checkUser = (req, res, next) => {
 };
 
 //jasser create token
-const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({ id }, "ebio secret", {
-    expiresIn: maxAge,
+  return jwt.sign({ id }, process.env.secretkey, {
+    expiresIn: process.env.tokenExpireTime,
   });
 };
 
@@ -183,8 +185,8 @@ module.exports.login_post = async (req, res) => {
   try {
     const user = await User.login(email, password);
     const token = createToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id });
+    //res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.tokenExpireTime * 1000 });
+    res.status(200).json({ email, token });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
@@ -429,59 +431,114 @@ module.exports.adminTest = function isAdmin(req, res, next) {
   }
 };
 
-module.exports.changeAtributeIsActive = async (req, res, next) => {
+module.exports.activateAccount = async (req, res, next) => {
   const user = await User.findById(req.params.accountId);
   try {
-    if (user.is_active == true) {
+    if (user.is_active == false) {
       const user = await User.findByIdAndUpdate(req.params.accountId, {
-        is_active: false,
+        is_active: true,
       });
-      res.send("Account deactivated.");
+      res.send("Account activated.you now have fully access to eBio page");
     } else {
-      await User.findByIdAndUpdate(req.params.accountId, { is_active: true });
-      res.send("Account activated.");
+      res.send("Your account is alraady activated");
     }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-module.exports.authorizeUser = async (req, res, next) => {
-  try {
-    const user = await User.findByIdAndUpdate(req.params.accountId, {
-      isAuthorized: true,
-    });
-    var mailOptions = {
-      from: "ebioapplication2222@gmail.com",
-      to: user.email,
-      subject: "eBio! Authorization Mail",
-      text: "Your account has been promoted to " + user.role + " !",
-      html:
-        "<!DOCTYPE html>" +
-        "<html><head><title>VAuthorization Mail</title>" +
-        "</head><body><div>" +
-        "<p>Dear " +
-        user.firstName +
-        " " +
-        user.lastName +
-        ",Your account has been successfully promoted to " +
-        user.role +
-        " status. Congratulations on this achievement! </p>" +
-        "<p>Regards,</p>" +
-        "<p>eBio support</p>" +
-        "</div></body></html>",
-    };
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
+module.exports.changeAtributeIsActive = async (req, res, next) => {
+  const token = req.cookies.jwt;
+  //check json web token exists & is verified
+  if (token) {
+    jwt.verify(token, process.env.secretkey, async (err, decodedToken) => {
+      let user = await User.findById(decodedToken.id);
+      if (err) {
+        console.log(err.message);
       } else {
-        console.log("Email sent: " + info.response);
+        try {
+          if (
+            user.is_active == true &&
+            (user.role === "user" ||
+              user.role === "deliverer" ||
+              user.role === "deliverer")
+          ) {
+            await User.findByIdAndUpdate(decodedToken.id, { is_active: false });
+            res.send("Account deactivated.");
+          } else if (
+            user.is_active == false &&
+            (user.role === "user" ||
+              user.role === "deliverer" ||
+              user.role === "deliverer")
+          ) {
+            var fullUrl =
+              req.protocol +
+              "://" +
+              req.get("host") +
+              "/user/verifyMail/" +
+              user._id;
+            sendVerificationMail(
+              user.firstName,
+              user.lastName,
+              fullUrl,
+              user.email,
+              user.activation_code,
+              transporter
+            );
+            res.send("Check your mail to reactivate you account");
+            //301 303 308
+          } else if (user.is_active == true && user.role === "admin") {
+            res.send("As an admin ,your account can not be deactivated.");
+          }
+        } catch (err) {
+          res.status(500).json({ message: err.message });
+        }
       }
     });
+  }
+};
 
-    res.status(201).json({ message: "Account has been authorized" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+module.exports.authorizeUser = async (req, res, next) => {
+  const user = User.findById(req.params.accountId);
+  if (user == null) {
+    res.status(201).json({ message: "Account not found" });
+  } else {
+    if (user.isAuthorized == true) {
+      res.status(201).json({ message: "Account is already authorized" });
+    } else {
+      const user = await User.findByIdAndUpdate(req.params.accountId, {
+        isAuthorized: true,
+      });
+      var mailOptions = {
+        from: "ebioapplication2222@gmail.com",
+        to: user.email,
+        subject: "eBio! Authorization Mail",
+        text: "Your account has been promoted to " + user.role + " !",
+        html:
+          "<!DOCTYPE html>" +
+          "<html><head><title>VAuthorization Mail</title>" +
+          "</head><body><div>" +
+          "<p>Dear " +
+          user.firstName +
+          " " +
+          user.lastName +
+          ",Your account has been successfully promoted to " +
+          user.role +
+          " status. Congratulations on this achievement! </p>" +
+          "<p>Regards,</p>" +
+          "<p>eBio support</p>" +
+          "</div></body></html>",
+      };
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+
+      res.status(201).json({ message: "Account has been authorized" });
+    }
   }
 };
 

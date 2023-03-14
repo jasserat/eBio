@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const express = require("express");
 const logger = require("morgan");
 const createError = require("http-errors");
@@ -5,6 +6,21 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const dbConfig = require("./DB/mongodb.json");
 const cookieParser = require("cookie-parser");
+=======
+const express = require('express');
+const logger = require('morgan');
+const createError = require('http-errors');
+require('dotenv').config();
+const mongoose = require('mongoose');
+const dbConfig = require('./DB/mongodb.json');
+const cookieParser = require('cookie-parser');
+const cors = require('cors')
+const cxpFormRouter = require('./routes/cxpFormR');
+const orderRouter = require('./routes/orderR');
+const productRouter = require('./routes/productR');
+const userRouter = require('./routes/userR');
+const WasteFormRouter = require('./routes/WasteFormR');
+>>>>>>> 97bdc45301acc0261a0a397e048e68366fbea3b4
 
 const cxpFormRouter = require("./routes/cxpFormR");
 const orderRouter = require("./routes/orderR");
@@ -13,8 +29,15 @@ const userRouter = require("./routes/userR");
 const WasteFormRouter = require("./routes/WasteFormR");
 const cors = require("cors");
 const app = express();
+<<<<<<< HEAD
 
 app.use(logger("dev"));
+=======
+app.use(cors({
+  origin: '*',
+}))
+app.use(logger('dev'));
+>>>>>>> 97bdc45301acc0261a0a397e048e68366fbea3b4
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
