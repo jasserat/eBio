@@ -92,7 +92,7 @@ module.exports.requireAuth = (req, res, next) => {
 
   //check json web token exists & is verified
   if (token) {
-    jwt.verify(token, 'ebio secret', (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, (err, decodedToken) => {
       if (err) {
         console.log(err.message);
         res.redirect('/login');
@@ -112,7 +112,7 @@ module.exports.requireAuthAndAdmin = (req, res, next) => {
   const token = req.cookies.jwt;
   //check json web token exists & is verified
   if (token) {
-    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, async (err, decodedToken) => {
       let user = await User.findById(decodedToken.id);
       console.log(user.role)
       if (err) {
@@ -138,7 +138,7 @@ module.exports.requireAuthAndAdmin = (req, res, next) => {
 module.exports.checkUser = (req, res, next) => {
   const token = req.cookies.jwt;
   if (token) {
-    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, async (err, decodedToken) => {
       if (err) {
         console.log(err.message);
         res.locals.user = null;
@@ -158,10 +158,9 @@ module.exports.checkUser = (req, res, next) => {
 }
 
 //jasser create token
-const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({ id }, 'ebio secret', {
-    expiresIn: maxAge
+  return jwt.sign({ id }, process.env.secretkey, {
+    expiresIn: process.env.tokenExpireTime
   })
 }
 
@@ -172,8 +171,8 @@ module.exports.login_post = async (req, res) => {
   try {
     const user = await User.login(email, password);
     const token = createToken(user._id);
-    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id });
+    //res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.tokenExpireTime * 1000 });
+    res.status(200).json({ email ,token });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
@@ -378,7 +377,7 @@ module.exports.changeAtributeIsActive = async (req, res, next) => {
   const token = req.cookies.jwt;
   //check json web token exists & is verified
   if (token) {
-    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
+    jwt.verify(token, process.env.secretkey, async (err, decodedToken) => {
       let user = await User.findById(decodedToken.id);
       if (err) {
         console.log(err.message);
