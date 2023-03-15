@@ -11,11 +11,11 @@ router.get('/verifyMail/:accountId',userS.activateAccount)
 router.get('/profile/:id', passport.authentification,async (req, res) => userS.getUserById(req.params.id)); // View user profile
 router.put('/:userId', passport.authentification,async(req,res) => userS.editUserProfile(req.params.userId,req.body)); // Edit user profile
 // ahmed
-router.get('/listUsers', userS.requireAuthAndAdmin, userS.listUser);
-router.get('/userSearch', userS.requireAuthAndAdmin, userS.userSearch);
+router.get('/listUsers', userS.listUser);
+router.get('/userSearch/:search', userS.userSearch);
 // ahmed passport.AdminAutorization 
-router.get('/accountActivation',userS.requireAuth ,userS.changeAtributeIsActive);
-router.put('/accountAuthorization/:accountId', userS.requireAuthAndAdmin, userS.authorizeUser);
+router.put('/accountActivation/:accountId' ,userS.changeAtributeIsActive);
+router.put('/accountAuthorization/:accountId', userS.authorizeUser);
 
 //reset password
 router.post('/resetPassword',userS.resetPassword)

@@ -11,13 +11,14 @@ const orderRouter = require('./routes/orderR');
 const productRouter = require('./routes/productR');
 const userRouter = require('./routes/userR');
 const WasteFormRouter = require('./routes/WasteFormR');
-
+const cors = require('cors');
 const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
 //app.use('/cxpForm', cxpFormRouter);
 //app.use('/order', orderRouter);

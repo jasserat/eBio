@@ -322,7 +322,7 @@ module.exports.editUserProfile = async (userId, updatedUser) => {
 module.exports.listUser = async (req, res, next) => {
   try {
     const user = await User.find();
-    res.send(user);
+    res.json(user);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: err.message });
@@ -331,7 +331,7 @@ module.exports.listUser = async (req, res, next) => {
 
 
 module.exports.userSearch = async (req, res, next) => {
-  const { search } = req.body;
+  const  search  = req.params.search;
   try {
     const users = await User.find({
       $or: [
@@ -375,25 +375,20 @@ module.exports.activateAccount = async (req, res, next) => {
 }
 
 module.exports.changeAtributeIsActive = async (req, res, next) => {
-  const token = req.cookies.jwt;
-  //check json web token exists & is verified
-  if (token) {
-    jwt.verify(token, 'ebio secret', async (err, decodedToken) => {
-      let user = await User.findById(decodedToken.id);
-      if (err) {
-        console.log(err.message);
-      } else {
+  
+    
+      let user = await User.findById(req.params.accountId);
+   
 
         try {
           if (user.is_active == true && (user.role === 'user' || user.role === 'deliverer' || user.role === 'deliverer')) {
-            await User.findByIdAndUpdate(decodedToken.id, { is_active: false })
+            await User.findByIdAndUpdate(req.params.accountId, { is_active: false })
             res.send('Account deactivated.')
           }
           else if (user.is_active == false && (user.role === 'user' || user.role === 'deliverer' || user.role === 'deliverer')) {
             var fullUrl = req.protocol + '://' + req.get('host') + '/user/verifyMail/' + user._id;
             sendVerificationMail(user.firstName, user.lastName, fullUrl, user.email, user.activation_code, transporter);
             res.send("Check your mail to reactivate you account")
-            //301 303 308
 
           } else if (user.is_active == true && (user.role === 'admin')) {
             res.send('As an admin ,your account can not be deactivated.')
@@ -403,9 +398,9 @@ module.exports.changeAtributeIsActive = async (req, res, next) => {
         }
 
 
-      }
-    })
-  }
+     
+    
+      
 }
 
 

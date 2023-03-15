@@ -31,7 +31,7 @@ var User = new Schema({
     password: {
         type: String,
         required: [true,'Please enter a password'],
-        minlength: [6,'Minimum password length is 6 characters'],
+        minlength: [6,'Minimum password length is 6 characters']
     },
     phoneNumber: {
       type: Number, 
