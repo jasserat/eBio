@@ -1,16 +1,18 @@
-const express = require("express");
-const logger = require("morgan");
-const createError = require("http-errors");
-require("dotenv").config();
-const mongoose = require("mongoose");
-const dbConfig = require("./DB/mongodb.json");
-const cookieParser = require("cookie-parser");
-const cors = require("cors");
-const cxpFormRouter = require("./routes/cxpFormR");
-const orderRouter = require("./routes/orderR");
-const productRouter = require("./routes/productR");
-const userRouter = require("./routes/userR");
-const WasteFormRouter = require("./routes/WasteFormR");
+const express = require('express');
+const logger = require('morgan');
+const createError = require('http-errors');
+require('dotenv').config();
+const mongoose = require('mongoose');
+const dbConfig = require('./DB/mongodb.json');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const cxpFormRouter = require('./routes/cxpFormR');
+
+const orderRouter = require('./routes/orderR');
+const productRouter = require('./routes/productR');
+const userRouter = require('./routes/userR');
+const WasteFormRouter = require('./routes/WasteFormR');
+
 
 const app = express();
 app.use(
@@ -22,6 +24,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
 //app.use('/cxpForm', cxpFormRouter);
 //app.use('/order', orderRouter);

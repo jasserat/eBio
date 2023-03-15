@@ -9,19 +9,13 @@ router.get("/verifyMail/:accountId", userS.changeAtributeIsActive);
 router.get("/profile/:token", userS.getUserById); // View user profile
 router.put("/:userId", userS.editUserProfile); // Edit user profile
 // ahmed
-router.get("/listUsers", userS.requireAuthAndAdmin, userS.listUser);
-router.get("/userSearch", userS.requireAuthAndAdmin, userS.userSearch);
-// ahmed passport.AdminAutorization
-router.get(
-  "/accountActivation",
-  userS.requireAuth,
-  userS.changeAtributeIsActive
-);
-router.put(
-  "/accountAuthorization/:accountId",
-  userS.requireAuthAndAdmin,
-  userS.authorizeUser
-);
+
+router.get('/listUsers', userS.listUser);
+router.get('/userSearch/:search', userS.userSearch);
+// ahmed passport.AdminAutorization 
+router.put('/accountActivation/:accountId' ,userS.changeAtributeIsActive);
+router.put('/accountAuthorization/:accountId', userS.authorizeUser);
+
 
 //reset password
 router.post("/resetPassword", userS.resetPassword);
