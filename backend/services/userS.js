@@ -350,9 +350,13 @@ module.exports.verifyMail = async (req, res) => {
 
 module.exports.getUserById = async (req, res) => {
   try {
-    console.log(req.params.userId);
-    const user = await User.findById(req.params.id);
-    console.log(user);
+    console.log("token     ", req.params.token);
+    const decoded = jwt.verify(req.params.token, process.env.secretkey);
+    console.log("decoded     ", decoded["id"]);
+    const user = await User.findOne({
+      _id: decoded["id"],
+    });
+    console.log("user     ", user);
     if (!user) res.status(400).json({ message: "User not found" });
     res.status(200).json(user);
   } catch (error) {
@@ -369,6 +373,14 @@ module.exports.editUserProfile = async (req, res) => {
     const updatedUser = req.body;
     const user = await User.findById(req.params.userId);
     if (!user) res.status(400).json({ message: "User not found" });
+    const existingUser = await User.findOne({ email: updatedUser.email });
+    const existingCIN = await User.findOne({ cin: updatedUser.cin });
+    if (existingUser && updatedUser.email !== user.email) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    if (existingCIN && updatedUser.cin !== user.cin) {
+      return res.status(400).json({ message: "CIN already exists" });
+    }
 
     // Update user properties with values from the updatedUser object
     user.firstName = updatedUser.firstName || user.firstName;
@@ -385,11 +397,9 @@ module.exports.editUserProfile = async (req, res) => {
     user.gender = updatedUser.gender || user.gender;
 
     const savedUser = await user.save();
-    res.status(200).json(savedUser);
+    return res.status(200).json(savedUser);
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: `Could not edit user profile: ${error.message}` });
+    return res.status(400).json({ message: `Could not edit user profile` });
   }
 };
 

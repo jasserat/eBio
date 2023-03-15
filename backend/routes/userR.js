@@ -6,8 +6,8 @@ const passport = require("../midlleware/passport");
 // emna
 router.post("/register", userS.verifyMail);
 router.get("/verifyMail/:accountId", userS.changeAtributeIsActive);
-router.get("/profile/:id", passport.authentification, userS.getUserById); // View user profile
-router.put("/:userId", passport.authentification, userS.editUserProfile); // Edit user profile
+router.get("/profile/:token", userS.getUserById); // View user profile
+router.put("/:userId", userS.editUserProfile); // Edit user profile
 // ahmed
 router.get("/listUsers", userS.requireAuthAndAdmin, userS.listUser);
 router.get("/userSearch", userS.requireAuthAndAdmin, userS.userSearch);
