@@ -28,7 +28,7 @@ app.use(cors());
 
 //app.use('/cxpForm', cxpFormRouter);
 //app.use('/order', orderRouter);
-//app.use('/product', productRouter);
+app.use('/product', productRouter);
 app.use("/user", userRouter);
 //app.use('/wasteForm', WasteFormRouter);
 
