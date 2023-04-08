@@ -11,7 +11,9 @@ const orderRouter = require("./routes/orderR");
 const productRouter = require("./routes/productR");
 const userRouter = require("./routes/userR");
 const WasteFormRouter = require("./routes/WasteFormR");
+const questionRouter = require("./routes/questionsR");
 
+const appointmentRouter = require("./routes/appointmentR");
 const app = express();
 app.use(
   cors({
@@ -28,7 +30,8 @@ app.use(express.urlencoded({ extended: false }));
 //app.use('/product', productRouter);
 app.use("/user", userRouter);
 //app.use('/wasteForm', WasteFormRouter);
-
+app.use("/questions", questionRouter);
+app.use("/appointments", appointmentRouter);
 app.use((req, res, next) => {
   next(createError(404));
 });

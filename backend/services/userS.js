@@ -286,6 +286,18 @@ sendVerificationMail = function sendVerificationMail(
     }
   });
 };
+/// emna getUserByRole
+module.exports.getUserByRole = async (req, res) => {
+  try {
+    const { role } = req.query;
+    const users = await User.find({
+      role,
+    });
+    res.status(201).json(users);
+  } catch (err) {
+    res.status(401).json({ message: err.message });
+  }
+};
 
 module.exports.verifyMail = async (req, res) => {
   try {
@@ -350,13 +362,10 @@ module.exports.verifyMail = async (req, res) => {
 
 module.exports.getUserById = async (req, res) => {
   try {
-    console.log("token     ", req.params.token);
     const decoded = jwt.verify(req.params.token, process.env.secretkey);
-    console.log("decoded     ", decoded["id"]);
     const user = await User.findOne({
       _id: decoded["id"],
     });
-    console.log("user     ", user);
     if (!user) res.status(400).json({ message: "User not found" });
     res.status(200).json(user);
   } catch (error) {
