@@ -12,7 +12,6 @@ const productRouter = require("./routes/productR");
 const userRouter = require("./routes/userR");
 const WasteFormRouter = require("./routes/WasteFormR");
 const questionRouter = require("./routes/questionsR");
-
 const appointmentRouter = require("./routes/appointmentR");
 const app = express();
 app.use(
@@ -24,10 +23,11 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
 //app.use('/cxpForm', cxpFormRouter);
 //app.use('/order', orderRouter);
-//app.use('/product', productRouter);
+app.use('/product', productRouter);
 app.use("/user", userRouter);
 //app.use('/wasteForm', WasteFormRouter);
 app.use("/questions", questionRouter);
