@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
-//app.use('/cxpForm', cxpFormRouter);
+app.use('/cxpForm', cxpFormRouter);
 //app.use('/order', orderRouter);
 app.use('/product', productRouter);
 app.use("/user", userRouter);
