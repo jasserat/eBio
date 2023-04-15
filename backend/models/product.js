@@ -34,10 +34,10 @@ var Product = new Schema({
         unique: false
     },
     farmer: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
         required: true,
-        unique: false
-    },
+      },
     rating: {
         type: Number,
         required: false,

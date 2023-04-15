@@ -3,15 +3,15 @@ const router = express.Router();
 const productS = require("../services/productS");
 
 // add product
-router.post("/addProduct", productS.addProduct);
+router.post("/add", productS.addProduct);
 // list product
-router.get("/listProduct", productS.listProduct);
+router.get("/list", productS.listProduct);
 // get product by id
 router.get("/getProductById/:id", productS.getProductById);
 // update product
-router.put("/editProduct/:id", productS.editProduct);
+router.put("/edit/:id", productS.editProduct);
 // delete product
-router.delete("/deleteProduct/:id", productS.deleteProduct);
+router.delete("/delete/:id", productS.deleteProduct);
 // search product
 router.get("/productSearch/:search", productS.productSearch);
 // filter product by price
