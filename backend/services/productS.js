@@ -32,6 +32,9 @@ module.exports.addProduct = async (req, res) => {
     }
 }
 
+
+
+
 //list product sorted by price
 module.exports.listProduct = async (req, res) => {
     try {
@@ -44,14 +47,18 @@ module.exports.listProduct = async (req, res) => {
     }
 }
 
-module.exports.getProductById = async (req, res) => {
+exports.getProductByFarmer = async (req, res) => {
     try {
-        const result = await product.findById(req.params.id);
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(400).json(error);
+      const { farmer } = req.query;
+      const products = await product.find({
+        farmer,
+      })
+        .populate("farmer");
+      res.status(201).json(products);
+    } catch (err) {
+      res.status(401).json({ message: err.message });
     }
-}
+  };
 
 //update product champs par champs
 module.exports.editProduct = async (req, res) => {
