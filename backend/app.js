@@ -10,6 +10,7 @@ const cxpFormRouter = require("./routes/cxpFormR");
 const orderRouter = require("./routes/orderR");
 const productRouter = require("./routes/productR");
 const userRouter = require("./routes/userR");
+const basketRouter = require("./routes/basketR")
 const WasteFormRouter = require("./routes/WasteFormR");
 const questionRouter = require("./routes/questionsR");
 const appointmentRouter = require("./routes/appointmentR");
@@ -29,6 +30,7 @@ app.use('/cxpForm', cxpFormRouter);
 //app.use('/order', orderRouter);
 app.use("/product", productRouter);
 app.use("/user", userRouter);
+app.use("/basket", basketRouter);
 //app.use('/wasteForm', WasteFormRouter);
 app.use("/questions", questionRouter);
 app.use("/appointments", appointmentRouter);
