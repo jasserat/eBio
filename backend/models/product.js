@@ -6,17 +6,17 @@ const Schema = mongoose.Schema;
 var Product = new Schema({
     name: {
         type: String,
-        required: true,
+        required: false,
         unique: false
     },
     description: {
         type: String,
-        required: true,
+        required: false,
         unique: false
     },
     price: {
         type: Number,
-        required: true,
+        required: false,
         unique: false
     },
     image: {
@@ -30,13 +30,13 @@ var Product = new Schema({
     },
     quantity: {
         type: Number,
-        required: true,
+        required: false,
         unique: false
     },
     farmer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "users",
-        required: true,
+        required: false,
       },
     rating: {
         type: Number,

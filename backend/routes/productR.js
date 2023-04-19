@@ -7,7 +7,8 @@ router.post("/add", productS.addProduct);
 // list product
 router.get("/list", productS.listProduct);
 // get product by id
-//router.get("/getProductById/:id", productS.getProductById);
+router.get("/getProduct/:id", productS.getProductById);
+// get product by farmer
 router.get("/farmer", productS.getProductByFarmer);
 // update product
 router.put("/edit/:id", productS.editProduct);
