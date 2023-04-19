@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const basketS = require('../services/basketS');
+const OrderS = require('../services/orderS')
 
 //increase quantity
 router.put('increase-quantity/userId/', basketS.increaseQuantity);
@@ -17,6 +18,12 @@ router.delete('/delete/:userId/', basketS.deleteProduct);
 
 //create Order 
 router.post('/createOrder/:userId', basketS.createOrder);
+
+//get all orders
+router.get('/orders/', basketS.getOrders);
+
+//get all orders
+router.get('/order/:id', basketS.getOrderbyId);
 
 //clear Basket
 

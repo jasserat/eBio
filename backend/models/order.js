@@ -15,7 +15,7 @@ var Order = new Schema({
     userId: {
         type: String,
         required: false,
-        unique: true
+        unique: false
     },
     ref: [{
         type: String,
