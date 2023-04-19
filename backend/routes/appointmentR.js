@@ -12,6 +12,7 @@ const {
   getAppointmentsByClient,
   getAppointmentsByStatus,
   acceptOrDeclineAppointment,
+  getAppointmentsByNutritionistCalendar
 } = require("../services/appointmentS");
 
 // Get appointment by date
@@ -19,6 +20,7 @@ router.get("/date", getAppointmentsByDate);
 
 // Get appointment by nutritionist
 router.get("/nutritionist", getAppointmentsByNutritionist);
+router.get("/nutritionistCalendar", getAppointmentsByNutritionistCalendar);
 // Get appointment by client
 router.get("/client", getAppointmentsByClient);
 

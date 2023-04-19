@@ -10,9 +10,12 @@ const questionSchema = new mongoose.Schema(
     nutritionist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
-      required: true,
     },
     question: {
+      type: String,
+      required: true,
+    },
+    title: {
       type: String,
       required: true,
     },
@@ -25,6 +28,10 @@ const questionSchema = new mongoose.Schema(
       enum: ["pending", "answered"],
       default: "pending",
     },
+    createdAt: {
+      type: Date,
+      default: Date.now()
+    }
   },
   { timestamps: true } //automatically generate createdAt and updatedAt fields
 );

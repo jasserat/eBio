@@ -26,6 +26,9 @@ exports.getAppointmentById = async (req, res, next) => {
 // Create appointment
 exports.createAppointment = async (req, res, next) => {
   try {
+    console.log(req.body);
+   // console.log(new Date(Date.UTC(req.body.dateApt)));
+
     const appointment = new Appointment({
       dateApt: req.body.dateApt,
       timeApt: req.body.timeApt,
@@ -33,9 +36,13 @@ exports.createAppointment = async (req, res, next) => {
       reasonApt: req.body.reasonApt,
       client: req.body.user,
       nutritionist: req.body.nutritionist,
+      statusApt: req.body.statusApt
     });
     const savedAppointment = await appointment.save();
-    res.status(201).json(savedAppointment);
+    const populatedAppointment = await Appointment.findById(savedAppointment._id)
+    .populate("nutritionist")
+    .populate("client");
+    res.status(201).json(populatedAppointment);
   } catch (error) {
     next(error);
   }
@@ -54,7 +61,10 @@ exports.updateAppointment = async (req, res, next) => {
     appointment.reasonApt = req.body.reasonApt;
     appointment.nutritionist = req.body.nutritionist;
     const savedAppointment = await appointment.save();
-    res.status(200).json(savedAppointment);
+    const populatedAppointment = await Appointment.findById(savedAppointment._id)
+    .populate("nutritionist")
+    .populate("client");
+    res.status(201).json(populatedAppointment);
   } catch (error) {
     next(error);
   }
@@ -99,6 +109,15 @@ exports.getAppointmentsByNutritionist = async (req, res) => {
   const appointments = await Appointment.find({
     nutritionist,
     statusApt:'pending'
+  })
+    .populate("client")
+    .populate("nutritionist");
+  res.json(appointments);
+};
+exports.getAppointmentsByNutritionistCalendar = async (req, res) => {
+  const { nutritionist } = req.query;
+  const appointments = await Appointment.find({
+    nutritionist,
   })
     .populate("client")
     .populate("nutritionist");

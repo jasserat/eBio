@@ -1,6 +1,16 @@
 const Question = require("../models/question");
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 // Get all questions
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "ebioapplication2222@gmail.com",
+    pass: "lzdgsvffzhpvldlu",
+  },
+});
+
 exports.getQuestions = async (req, res) => {
   try {
     const questions = await Question.find({});
@@ -15,7 +25,9 @@ exports.getQuestions = async (req, res) => {
 // Get question by ID
 exports.getQuestionById = async (req, res) => {
   try {
-    const question = await Question.findById(req.params.id);
+    const question = await Question.findById(req.params.id)
+      .populate("client")
+      .populate("nutritionist");
     if (!question) {
       return res.status(404).json({ msg: "Question not found" });
     }
@@ -56,10 +68,13 @@ exports.getQuestionsByClient = async (req, res) => {
 // Create question
 exports.createQuestion = async (req, res) => {
   try {
-    const { client, nutritionist, question } = req.body;
-    const newQuestion = new Question({ client, nutritionist, question });
+    const { client, question, title } = req.body;
+    const newQuestion = new Question({ client, question, title });
     const questionSaved = await newQuestion.save();
-    res.json(questionSaved);
+    const populatedQuestion = await Question.findById(
+      questionSaved._id
+    ).populate("client");
+    res.json(populatedQuestion);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -76,12 +91,16 @@ exports.editQuestion = async (req, res) => {
     if (question.status === "answered") {
       return res.status(400).json({ msg: "Cannot edit answered question" });
     }
-    const { client, nutritionist, question: newQuestion } = req.body;
+    const { client, nutritionist, question: newQuestion, title } = req.body;
     question.client = client;
     question.nutritionist = nutritionist;
     question.question = newQuestion;
+    question.title = title;
     await question.save();
-    res.json(question);
+    const populatedQuestion = await Question.findById(question._id)
+      .populate("client")
+      .populate("nutritionist");
+    res.json(populatedQuestion);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -124,7 +143,9 @@ exports.getUnansweredQuestions = async (req, res) => {
 exports.getAnsweredQuestions = async (req, res) => {
   try {
     console.log("bbbbbbbb");
-    const answeredQuestions = await Question.find({ status: "answered" });
+    const answeredQuestions = await Question.find({ status: "answered" })
+      .populate("client")
+      .populate("nutritionist");
     res.json(answeredQuestions);
   } catch (err) {
     console.error(err.message);
@@ -134,10 +155,12 @@ exports.getAnsweredQuestions = async (req, res) => {
 
 // Answer a question
 exports.answerQuestion = async (req, res) => {
-  const { answer } = req.body;
+  const { answer, nutritionist } = req.body;
 
   try {
-    let question = await Question.findById(req.params.questionId);
+    let question = await Question.findById(req.params.questionId).populate(
+      "client"
+    );
 
     if (!question) {
       return res.status(404).json({ msg: "Question not found" });
@@ -149,12 +172,70 @@ exports.answerQuestion = async (req, res) => {
 
     question.answer = answer;
     question.status = "answered";
+    question.nutritionist = nutritionist;
 
     await question.save();
 
-    res.json(question);
+    let populatedquestion = await Question.findById(req.params.questionId)
+      .populate("client")
+      .populate("nutritionist");
+    sendQuestionAnswered(
+      populatedquestion.client.firstName +
+        " " +
+        populatedquestion.client.lastName,
+      populatedquestion.nutritionist.firstName +
+        " " +
+        populatedquestion.nutritionist.lastName,
+      populatedquestion.title,
+      populatedquestion.answer,
+      populatedquestion.client.email,
+      transporter
+    );
+    res.json(populatedquestion);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
+};
+
+const sendQuestionAnswered = (
+  clientFullName,
+  nutritionistFullName,
+  title,
+  answer,
+  email,
+  transporter
+) => {
+  var mailOptions = {
+    from: "ebioapplication2222@gmail.com",
+    to: email,
+    subject: "eBio! Question Answered",
+    html:
+      "<!DOCTYPE html>" +
+      "<html><head><title>Question Answered</title>" +
+      "</head><body><div>" +
+      "<p>Dear Hello dear customer " +
+      clientFullName +
+      ",</p> <br />" +
+      "<p>We are pleased to inform you that the nutritionist " +
+      nutritionistFullName +
+      " has answered your question</p> <br />" +
+      "<p>Question : " +
+      title +
+      "</p> <br />" +
+      "<p>Answer : " +
+      answer +
+      "</p> <br />" +
+      "<p>Regards,</p>" +
+      "<p>eBio support</p>" +
+      "</div></body></html>",
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
 };
