@@ -1,5 +1,6 @@
 // Import the basket module
 const basket = require ('./basketS');
+const Order = require ('../models/order')
 
 // Define the order management module
 
@@ -27,6 +28,8 @@ const basket = require ('./basketS');
   }
  
 
+  
+
   // Define the function to get all orders for a user
   module.exports.getOrdersByUserId = async(req,res) => {
     const  userId  = req.params.userId;
@@ -46,8 +49,19 @@ const basket = require ('./basketS');
 
   // Define the function to get all orders
    module.exports.getAllOrders = async (res) => {
-    // return orders;
-    res.json(orders);
+    try {
+      const orders = await Order.find({});
+      return orders
+    } catch (error) {
+      console.error('Failed to retrieve orders:', error);
+      // res.json({ error: 'Failed to retrieve orders' });
+    //   console.error('Failed to retrieve orders:', error);
+    // res.status(500).send(JSON.stringify({ error: 'Failed to retrieve orders' }));
+    // console.error('Failed to retrieve orders:', error);
+    // res.writeHead(500, { 'Content-Type': 'application/json' });
+    // res.write(JSON.stringify({ error: 'Failed to retrieve orders' }));
+    // res.end();
+    }
   }
 
   // Return the public API of the order management module

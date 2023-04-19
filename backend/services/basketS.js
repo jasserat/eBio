@@ -2,6 +2,7 @@
 const Basket = require('../models/basket');
 const Product = require('../models/product');
 const Order = require ('../models/order');
+const order = require('../models/order');
 
 //increase quantity in the basket
 module.exports.increaseQuantity = async (req,res) =>{
@@ -190,7 +191,7 @@ module.exports.deleteProduct = async (req, res) => {
         const updatedBasket = await existingBasket.save();
     //     newQuantity = product.quantity + 1 
     //     await Product.findByIdAndUpdate(productId, { quantity : newQuantity });
-    //     res.json(updatedBasket);
+        res.json(updatedBasket);
     // //   } catch (error) {
     //     console.error('Failed to delete product from basket:', error);
     //     res.status(500).json({ error: 'Failed to delete product from basket' });
@@ -225,7 +226,7 @@ module.exports.createOrder = async(req, res) => {
   const totalPrice = products.reduce((acc, curr) => acc + curr.price * curr.quantity, 0);
 
   
-  
+   
   const consumptionDate = req.body.consumptionDate;
 
   const members = req.body.members; 
@@ -254,3 +255,25 @@ module.exports.createOrder = async(req, res) => {
 
     return order;
   };
+
+
+  module.exports.getOrders = async (req,res) => {
+    
+    try {
+      const orders = await Order.find();     
+      res.json(orders);  
+    } catch (error) {
+      console.error('Failed to retrieve orders:', error);
+    }
+  };
+
+
+  module.exports.getOrderbyId = async (req , res) => {
+    const orderId =req.params.id
+    try {
+      const order = await Order.findById(orderId)    ; 
+      res.json(order);  
+    } catch (error) {
+      console.error('Failed to retrieve order:', error);
+    }
+  }
