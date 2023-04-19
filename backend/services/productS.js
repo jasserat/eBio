@@ -3,6 +3,15 @@ const omit = require('../utils/omit');
 const uploadImage = require('../utils/cloudinary/uploadImage');
 const fs = require('fs');
 const path = require('path');
+const User = require('../models/user');
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "ebioapplication2222@gmail.com",
+      pass: "lzdgsvffzhpvldlu",
+    },
+  });
 /*
 module.exports.addProduct = async (req, res) => {
     try {
@@ -13,6 +22,44 @@ module.exports.addProduct = async (req, res) => {
         res.status(400).json(error);
     }
 }*/
+
+sendEmail = function sendVerificationMail(
+    prodName,
+    firstName,
+    lastName,
+    email,
+    transporter
+  ) {
+    // console.log(fullUrl + " " + email);
+    var mailOptions = {
+      from: "ebioapplication2222@gmail.com",
+      to: email,
+      subject: "eBio new product",
+      text: "That was easy!",
+      html:
+        "<!DOCTYPE html>" +
+        "<html><head><title>Verification Mail</title>" +
+        "</head><body><div>" +
+        "<p>Dear " +
+        firstName +
+        " " +
+        lastName +
+        ", New Product has been added to our store (" +
+        prodName +
+        ").</p>" +
+        "<p>Regards,</p>" +
+        "<p>eBio support</p>" +
+        "</div></body></html>",
+    };
+  
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+  };
 
 // ajouter produit champs par champs
 module.exports.addProduct = async (req, res) => {
@@ -48,11 +95,23 @@ module.exports.addProduct = async (req, res) => {
         //     }
         // }
             const result = await newProduct.save();
+            //send email to all users
+            const users = await User.find();
+            users.forEach((user) => {
+                sendEmail(
+                newProduct.name,
+                user.firstName,
+                user.lastName,
+                user.email,
+                transporter
+                );
+            });
             res.status(201).json(result);
         } catch (error) {
             res.status(400).json(error);
         }
 }
+
 
 //get product by id
 module.exports.getProductById = async (req, res) => {
