@@ -1,7 +1,8 @@
 const mongoose =require('mongoose');
 const Schema = mongoose.Schema;
-const products = require('./product')
-const basket = require('./basket')
+const products = require('./product');
+const basket = require('./basket');
+
 
 const StateEnum = {
     OnHold: 'On hold',
@@ -11,16 +12,40 @@ const StateEnum = {
   };
 
 
-var Order = new Schema({
-    userId: {
+  
+
+  var Product = new Schema({
+    productId :  {  
         type: String,
         required: false,
         unique: false
     },
-    ref: [{
+    name: {
         type: String,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true
+    }
+});
+
+
+
+var Order = new Schema({
+   userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref : 'User',
+        required : false,
+        unique : false 
+    },
+    ref: [{
+        type: [Product],
         enum: basket.schema.path('products').schema.path('name').enumValues,
-        // enum: basket.products.map(p => p.name),
         required: true
       }],
     state: {
@@ -34,20 +59,20 @@ var Order = new Schema({
         required: true,
         unique: true
     },
-    somme :  {
-      type: Number,
-      required: true,
-      unique: true
-  },
+  //   somme :  {
+  //     type: Number
+  // },
 
     consumptionDate :  {
         type: Date
     },
      members : {
         type: Number ,
-        unique: false
+        default:1
     }
 });
+
+
 
 // Add a pre-save hook to remove the user's basket from the database when an order is created
 Order.pre('save', async function() {
