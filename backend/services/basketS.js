@@ -151,6 +151,7 @@ module.exports.showBasket = async (req, res) => {
         const basket = await await Basket.findOne({ userId });
         const response = basket.products.map(product => {
           return {
+            productId : product.productId, 
             name: product.name,
             price: product.price,
             quantity: product.quantity

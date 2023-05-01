@@ -120,7 +120,10 @@ var User = new Schema({
     default: function () {
       return !this.role === "farmer" || !this.role === "deliverer";
     },
-  },
+  },wasteFormStatus:{
+    type: Boolean,
+    default: false
+    },
 });
 
 //jasser static method to login user

@@ -32,7 +32,7 @@ app.use("/product", productRouter);
 app.use("/user", userRouter);
 app.use("/basket", basketRouter);
 app.use("/order", orderRouter);
-//app.use('/wasteForm', WasteFormRouter);
+app.use('/wasteForm', WasteFormRouter);
 app.use("/questions", questionRouter);
 app.use("/appointments", appointmentRouter);
 app.use((req, res, next) => {
