@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { isEmail } = require("validator");
 const bcrypt = require("bcrypt");
-
 const Role = ["admin", "user", "farmer", "deliverer", "nutritionist"];
 
 const genderType = ["male", "female"];
@@ -102,6 +101,15 @@ var User = new Schema({
   experience: {
     type: String,
   },
+  activity: {
+    type: String,
+  },
+  goal: {
+    type: String,
+  },
+  number_of_meals: {
+    type: Number,
+  },
   bio: {
     type: String,
   },
@@ -120,10 +128,11 @@ var User = new Schema({
     default: function () {
       return !this.role === "farmer" || !this.role === "deliverer";
     },
-  },wasteFormStatus:{
+  },
+  wasteFormStatus: {
     type: Boolean,
-    default: false
-    },
+    default: false,
+  },
 });
 
 //jasser static method to login user
