@@ -1,4 +1,5 @@
 const mongoose =require('mongoose');
+const { url } = require('../utils/cloudinary');
 const Schema = mongoose.Schema;
 
 
@@ -20,8 +21,16 @@ var Product = new Schema({
         unique: false
     },
     image: {
-        type: String,
-        unique: false
+        // type: String,
+        // required: false,
+        public_id: {
+            type: String,
+            required: false,
+        },
+        url: {
+            type: String,
+            required: false,
+        }
     },
     category: {
         type: String,

@@ -1,10 +1,12 @@
 const product = require('../models/product');
-const omit = require('../utils/omit');
-const uploadImage = require('../utils/cloudinary/uploadImage');
 const fs = require('fs');
 const path = require('path');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
+const cloudinary = require('../utils/cloudinary');
+const {spawn, spawnSync} = require('child_process');
+// var spawn = require("child_process").spawn;
+
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -63,15 +65,23 @@ sendEmail = function sendVerificationMail(
 
 // ajouter produit champs par champs
 module.exports.addProduct = async (req, res) => {
-    console.log(req.body)
+    const {name, description, price, image, quantity} = req.body;
     try {
+        const img = await cloudinary.uploader.upload(image, {
+            folder : "eBio/products",
+            width: 500,
+            crop: "scale"
+        });
         const newProduct = new product({
-            name: req.body.name,
-            price: req.body.price,
-            description: req.body.description,
-            image: req.body.image,
-            category: req.body.category,
-            quantity: req.body.quantity,
+            name,
+            price,
+            description,
+            image: {
+                public_id: img.public_id,
+                url: img.secure_url
+            },
+            //category: req.body.category,
+            quantity,
             farmer: req.body.farmer,
             // rating: req.body.rating,
             // reviews: req.body.reviews,
@@ -94,10 +104,12 @@ module.exports.addProduct = async (req, res) => {
         //     } 
         //     }
         // }
+            
             const result = await newProduct.save();
             //send email to all users
             const users = await User.find();
             users.forEach((user) => {
+                if (user.role === "user")
                 sendEmail(
                 newProduct.name,
                 user.firstName,
