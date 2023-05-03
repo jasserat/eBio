@@ -13,7 +13,6 @@ const transporter = nodemailer.createTransport({
 //git checkout -m branch
 //git push branch
 
-
 // emna  Register / confirmation mail
 registerUser = async function registerUser(
   firstName,
@@ -413,6 +412,28 @@ module.exports.editUserProfile = async (req, res) => {
   }
 };
 
+module.exports.editUserProfilling = async (req, res) => {
+  try {
+    const updatedUser = req.body;
+    const user = await User.findById(req.params.userId);
+    if (!user) res.status(400).json({ message: "User not found" });
+
+    // Update user properties with values from the updatedUser object
+    user.dateOfBirth = updatedUser.dateOfBirth || user.dateOfBirth;
+    user.height = updatedUser.height || user.height;
+    user.weight = updatedUser.weight || user.weight;
+    user.gender = updatedUser.gender || user.gender;
+    user.goal = updatedUser.goal || user.goal;
+    user.activity = updatedUser.activity || user.activity;
+    user.number_of_meals = updatedUser.number_of_meals || user.number_of_meals;
+
+    const savedUser = await user.save();
+    return res.status(200).json(savedUser);
+  } catch (error) {
+    return res.status(400).json({ message: `Could not edit user profilling` });
+  }
+};
+
 //ahmed ListUser / SearchUsers / TestAdmin / ActivationDeactivationAccount / ConfirmRole+Mail
 
 module.exports.listUser = async (req, res, next) => {
@@ -426,7 +447,7 @@ module.exports.listUser = async (req, res, next) => {
 };
 
 module.exports.userSearch = async (req, res, next) => {
-  const  search  = req.params.search;
+  const search = req.params.search;
   try {
     const users = await User.find({
       $or: [
@@ -468,33 +489,41 @@ module.exports.activateAccount = async (req, res, next) => {
 };
 
 module.exports.changeAtributeIsActive = async (req, res, next) => {
-  
-    
-      let user = await User.findById(req.params.accountId);
-   
+  let user = await User.findById(req.params.accountId);
 
-        try {
-          if (user.is_active == true && (user.role === 'user' || user.role === 'deliverer' || user.role === 'farmer')) {
-            await User.findByIdAndUpdate(req.params.accountId, { is_active: false })
-            res.send('Account deactivated.')
-          }
-          else if (user.is_active == false && (user.role === 'user' || user.role === 'deliverer' || user.role === 'farmer')) {
-            var fullUrl = req.protocol + '://' + req.get('host') + '/user/verifyMail/' + user._id;
-            sendVerificationMail(user.firstName, user.lastName, fullUrl, user.email, user.activation_code, transporter);
-            res.send("Check your mail to reactivate you account")
-
-          } else if (user.is_active == true && (user.role === 'admin')) {
-            res.send('As an admin ,your account can not be deactivated.')
-          }
-        } catch (err) {
-          res.status(500).json({ message: err.message });
-        }
-
-
-     
-    
-      
-}
+  try {
+    if (
+      user.is_active == true &&
+      (user.role === "user" ||
+        user.role === "deliverer" ||
+        user.role === "farmer")
+    ) {
+      await User.findByIdAndUpdate(req.params.accountId, { is_active: false });
+      res.send("Account deactivated.");
+    } else if (
+      user.is_active == false &&
+      (user.role === "user" ||
+        user.role === "deliverer" ||
+        user.role === "farmer")
+    ) {
+      var fullUrl =
+        req.protocol + "://" + req.get("host") + "/user/verifyMail/" + user._id;
+      sendVerificationMail(
+        user.firstName,
+        user.lastName,
+        fullUrl,
+        user.email,
+        user.activation_code,
+        transporter
+      );
+      res.send("Check your mail to reactivate you account");
+    } else if (user.is_active == true && user.role === "admin") {
+      res.send("As an admin ,your account can not be deactivated.");
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 module.exports.authorizeUser = async (req, res, next) => {
   const user = User.findById(req.params.accountId);

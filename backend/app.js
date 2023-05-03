@@ -31,7 +31,8 @@ app.use('/cxpForm', cxpFormRouter);
 app.use("/product", productRouter);
 app.use("/user", userRouter);
 app.use("/basket", basketRouter);
-//app.use('/wasteForm', WasteFormRouter);
+app.use("/order", orderRouter);
+app.use('/wasteForm', WasteFormRouter);
 app.use("/questions", questionRouter);
 app.use("/appointments", appointmentRouter);
 app.use((req, res, next) => {

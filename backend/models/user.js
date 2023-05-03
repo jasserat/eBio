@@ -102,6 +102,15 @@ var User = new Schema({
   experience: {
     type: String,
   },
+  activity: {
+    type: String,
+  },
+  goal: {
+    type: String,
+  },
+  number_of_meals: {
+    type: Number,
+  },
   bio: {
     type: String,
   },
@@ -120,6 +129,10 @@ var User = new Schema({
     default: function () {
       return !this.role === "farmer" || !this.role === "deliverer";
     },
+  },
+  wasteFormStatus: {
+    type: Boolean,
+    default: false,
   },
 });
 
