@@ -82,7 +82,7 @@ module.exports.addProduct = async (req, res) => {
         // Téléchargement de l'image sur Cloudinary
         const uploadResult = await cloudinary.uploader.upload(imageUrl, {
           folder: 'eBio/products',
-          width: 500,
+          width: 5000,
           crop: 'scale'
         });
   
@@ -136,7 +136,7 @@ module.exports.getProductById = async (req, res) => {
 //list product sorted by price
 module.exports.listProduct = async (req, res) => {
     try {
-        const result = await product.find().sort({price: 1});
+        const result = await product.find().sort({date: -1});
         res.status(200).json(result);
         console.log("success")
         console.log(result)
