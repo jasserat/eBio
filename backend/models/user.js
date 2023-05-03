@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { isEmail } = require("validator");
 const bcrypt = require("bcrypt");
-
 const Role = ["admin", "user", "farmer", "deliverer", "nutritionist"];
 
 const genderType = ["male", "female"];

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const productS = require("../services/productS");
+const multer = require('multer');
+
 
 // add product
 router.post("/add", productS.addProduct);

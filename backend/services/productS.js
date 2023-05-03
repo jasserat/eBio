@@ -1,10 +1,10 @@
 const product = require('../models/product');
-const omit = require('../utils/omit');
-const uploadImage = require('../utils/cloudinary/uploadImage');
-const fs = require('fs');
-const path = require('path');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
+const cloudinary = require('../utils/cloudinary');
+const axios = require('axios');
+
+
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -12,16 +12,6 @@ const transporter = nodemailer.createTransport({
       pass: "lzdgsvffzhpvldlu",
     },
   });
-/*
-module.exports.addProduct = async (req, res) => {
-    try {
-        const newProduct = new product(req.body);
-        const result = await newProduct.save();
-        res.status(201).json(result);
-    } catch (error) {
-        res.status(400).json(error);
-    }
-}*/
 
 sendEmail = function sendVerificationMail(
     prodName,
@@ -63,54 +53,71 @@ sendEmail = function sendVerificationMail(
 
 // ajouter produit champs par champs
 module.exports.addProduct = async (req, res) => {
-    console.log(req.body)
+    const { name, description, price, quantity, image } = req.body;
+  
     try {
-        const newProduct = new product({
-            name: req.body.name,
-            price: req.body.price,
-            description: req.body.description,
-            image: req.body.image,
-            category: req.body.category,
-            quantity: req.body.quantity,
-            farmer: req.body.farmer,
-            // rating: req.body.rating,
-            // reviews: req.body.reviews,
-            // date: req.body.date
+      let imageUrl;
+      let publicId;
+  
+      // Vérifier si une image est incluse dans la requête HTTP
+      if (image) {
+        // Télécharger l'image directement sur Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(image, {
+          folder: 'eBio/products',
+          width: 500,
+          crop: 'scale'
         });
-        // const prodData = omit(req.body, ['file']);
-        // const newProduct = new product(prodData);
-
-
-        // if (Object.keys(req.files || {}).length > 0) {
-
-        //     const image = req.files.file[0] || req.body.file || { path: '' };
-        //     const uploadedImage = await uploadImage(image.path);
-
-        //     newProduct.image = uploadedImage ? uploadedImage.url : '';
-        //     if (uploadedImage) {
-        //     let filePath = path.join(`${__dirname}/../../, image.path`);
-        //     if (filePath.includes('uploads')) {
-        //         fs.unlink(filePath, () => {});
-        //     } 
-        //     }
-        // }
-            const result = await newProduct.save();
-            //send email to all users
-            const users = await User.find();
-            users.forEach((user) => {
-                sendEmail(
-                newProduct.name,
-                user.firstName,
-                user.lastName,
-                user.email,
-                transporter
-                );
-            });
-            res.status(201).json(result);
-        } catch (error) {
-            res.status(400).json(error);
+  
+        imageUrl = uploadResult.secure_url;
+        publicId = uploadResult.public_id;
+      } else {
+        // Recherche d'image sur Unsplash en utilisant le nom du produit
+        const response = await axios.get(`https://api.unsplash.com/search/photos?query=${name}`, {
+          headers: {
+            Authorization: 'Client-ID N6BO5Z57_HtYp-AzWgmt90Rdzy6SqQIzPwtk7DMgmM8'
+          }
+        });
+        imageUrl = response.data.results[0].urls.regular;
+  
+        // Téléchargement de l'image sur Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(imageUrl, {
+          folder: 'eBio/products',
+          width: 5000,
+          crop: 'scale'
+        });
+  
+        publicId = uploadResult.public_id;
+      }
+  
+      // Création d'un nouveau produit avec l'URL de l'image de Cloudinary
+      const newProduct = new product({
+        name,
+        description,
+        price,
+        image: {
+          public_id: publicId,
+          url: imageUrl
+        },
+        quantity,
+        farmer: req.body.farmer
+      });
+  
+      // Enregistrement du nouveau produit dans la base de données
+      const result = await newProduct.save();
+  
+      // Envoi d'un e-mail à tous les utilisateurs
+      const users = await User.find();
+      users.forEach((user) => {
+        if (user.role === 'user') {
+          sendEmail(newProduct.name, user.firstName, user.lastName, user.email, transporter);
         }
-}
+      });
+  
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(400).json(error);
+    }
+  };
 
 
 //get product by id
@@ -129,7 +136,7 @@ module.exports.getProductById = async (req, res) => {
 //list product sorted by price
 module.exports.listProduct = async (req, res) => {
     try {
-        const result = await product.find().sort({price: 1});
+        const result = await product.find().sort({date: -1});
         res.status(200).json(result);
         console.log("success")
         console.log(result)
@@ -182,13 +189,29 @@ module.exports.editProduct = async (req, res) => {
 
 //delete product
 module.exports.deleteProduct = async (req, res) => {
-    try{
-        const result = await product.findByIdAndDelete(req.params.id);
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(400).json(error);
+  const productId = req.params.id;
+
+  try {
+    // Récupérer le produit à partir de la base de données
+    const productToDelete = await product.findById(productId);
+
+    if (!productToDelete) {
+      return res.status(404).json({ message: 'Produit non trouvé' });
     }
-}
+
+    // Supprimer l'image de Cloudinary si elle existe
+    if (productToDelete.image.public_id) {
+      await cloudinary.uploader.destroy(productToDelete.image.public_id);
+    }
+
+    // Supprimer le produit de la base de données
+    await product.findByIdAndDelete(productId);
+
+    res.status(200).json({ message: 'Produit supprimé avec succès' });
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
 
 //search product by name or farmer or date
 module.exports.productSearch = async (req, res) => {
