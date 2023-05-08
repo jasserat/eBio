@@ -18,9 +18,12 @@ router.get("/userSearch/:search", userS.userSearch);
 router.put("/accountActivation/:accountId", userS.changeAtributeIsActive);
 router.put("/accountAuthorization/:accountId", userS.authorizeUser);
 
+//forget password
+router.post('/forgetPassword',userS.forgetPassword);
+router.put('/newPass/:code/:id',userS.newPass);
+
 //reset password
-router.post("/resetPassword", userS.resetPassword);
-router.put("/newPass/:code", userS.newPass);
+router.put('/resetPassword/:id',userS.resetPassword);
 
 //Jasser
 //login

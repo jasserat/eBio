@@ -1,6 +1,7 @@
 // Import the basket module
 const basket = require ('./basketS');
-const Order = require ('../models/order')
+const Order = require ('../models/order');
+const order = require('../models/order');
 
 // Define the order management module
 
@@ -18,6 +19,10 @@ const Order = require ('../models/order')
     // Return the new order object
     return order;
   }
+
+
+
+
 
   // Define the function to get an order by its order number
 
@@ -62,7 +67,8 @@ const Order = require ('../models/order')
     // res.write(JSON.stringify({ error: 'Failed to retrieve orders' }));
     // res.end();
     }
-  }
+  } 
+
 
   // Return the public API of the order management module
   // return {
@@ -71,4 +77,4 @@ const Order = require ('../models/order')
   //   getOrdersByUserId,
   //   updateOrderState,
   //   getAllOrders,
-  // };
+  // }
