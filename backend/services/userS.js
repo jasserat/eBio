@@ -188,8 +188,10 @@ module.exports.login_post = async (req, res) => {
     //res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.tokenExpireTime * 1000 });
     res.status(200).json({ email, token });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const error =err.message;
+    res.status(400).json({ error });
+    // const errors = handleErrors(err);
+    // res.status(400).json({ errors });
   }
 };
 
