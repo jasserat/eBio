@@ -53,71 +53,71 @@ sendEmail = function sendVerificationMail(
 
 // ajouter produit champs par champs
 module.exports.addProduct = async (req, res) => {
-    const { name, description, price, quantity, image } = req.body;
-  
-    try {
-      let imageUrl;
-      let publicId;
-  
-      // Vérifier si une image est incluse dans la requête HTTP
-      if (image) {
-        // Télécharger l'image directement sur Cloudinary
-        const uploadResult = await cloudinary.uploader.upload(image, {
-          folder: 'eBio/products',
-          width: 500,
-          crop: 'scale'
-        });
-  
-        imageUrl = uploadResult.secure_url;
-        publicId = uploadResult.public_id;
-      } else {
-        // Recherche d'image sur Unsplash en utilisant le nom du produit
-        const response = await axios.get(`https://api.unsplash.com/search/photos?query=${name}`, {
-          headers: {
-            Authorization: 'Client-ID N6BO5Z57_HtYp-AzWgmt90Rdzy6SqQIzPwtk7DMgmM8'
-          }
-        });
-        imageUrl = response.data.results[0].urls.regular;
-  
-        // Téléchargement de l'image sur Cloudinary
-        const uploadResult = await cloudinary.uploader.upload(imageUrl, {
-          folder: 'eBio/products',
-          width: 5000,
-          crop: 'scale'
-        });
-  
-        publicId = uploadResult.public_id;
-      }
-  
-      // Création d'un nouveau produit avec l'URL de l'image de Cloudinary
-      const newProduct = new product({
-        name,
-        description,
-        price,
-        image: {
-          public_id: publicId,
-          url: imageUrl
-        },
-        quantity,
-        farmer: req.body.farmer
+  const { name, description, price, quantity, image } = req.body;
+
+  try {
+    let imageUrl;
+    let publicId;
+
+    // Vérifier si une image est incluse dans la requête HTTP
+    if (image) {
+      // Télécharger l'image directement sur Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(image, {
+        folder: 'eBio/products',
+        width: 500,
+        crop: 'scale'
       });
-  
-      // Enregistrement du nouveau produit dans la base de données
-      const result = await newProduct.save();
-  
-      // Envoi d'un e-mail à tous les utilisateurs
-      const users = await User.find();
-      users.forEach((user) => {
-        if (user.role === 'user') {
-          sendEmail(newProduct.name, user.firstName, user.lastName, user.email, transporter);
+
+      imageUrl = uploadResult.secure_url;
+      publicId = uploadResult.public_id;
+    } else {
+      // Recherche d'image sur Unsplash en utilisant le nom du produit
+      const response = await axios.get(`https://api.unsplash.com/search/photos?query=${name}`, {
+        headers: {
+          Authorization: 'Client-ID N6BO5Z57_HtYp-AzWgmt90Rdzy6SqQIzPwtk7DMgmM8'
         }
       });
-  
-      res.status(201).json(result);
-    } catch (error) {
-      res.status(400).json(error);
+      imageUrl = response.data.results[0].urls.regular;
+
+      // Téléchargement de l'image sur Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(imageUrl, {
+        folder: 'eBio/products',
+        width: 500,
+        crop: 'scale'
+      });
+
+      publicId = uploadResult.public_id;
     }
-  };
+
+    // Création d'un nouveau produit avec l'URL de l'image de Cloudinary
+    const newProduct = new product({
+      name,
+      description,
+      price,
+      image: {
+        public_id: publicId,
+        url: imageUrl
+      },
+      quantity,
+      farmer: req.body.farmer
+    });
+
+    // Enregistrement du nouveau produit dans la base de données
+    const result = await newProduct.save();
+
+    // Envoi d'un e-mail à tous les utilisateurs
+    const users = await User.find();
+    users.forEach((user) => {
+      if (user.role === 'user') {
+        sendEmail(newProduct.name, user.firstName, user.lastName, user.email, transporter);
+      }
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
 
 
 //get product by id
