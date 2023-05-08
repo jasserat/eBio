@@ -25,6 +25,8 @@ router.get('/orders/', basketS.getOrders);
 //get all orders
 router.get('/order/:id', basketS.getOrderbyId);
 
+router.post('/updateState/:orderId/' , basketS.updateState);
+
 //clear Basket
 
 module.exports = router;
