@@ -59,9 +59,7 @@ var Order = new Schema({
         required: true,
         unique: true
     },
-  //   somme :  {
-  //     type: Number
-  // },
+
 
     consumptionDate :  {
         type: Date
@@ -69,6 +67,11 @@ var Order = new Schema({
      members : {
         type: Number ,
         default:1
+    }
+    ,
+    done:{
+      type:Boolean,
+      default:false
     }
 });
 

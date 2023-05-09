@@ -1,6 +1,7 @@
 
 const WasteForm = require("../models/wasteForm");
 const User = require("../models/user");
+const Order = require('../models/order');
 
 async function addWasteForm(userId, products) {
     try {
@@ -26,11 +27,12 @@ async function addWasteForm(userId, products) {
     try {
 
       const {
-        userId
+        userId,orderId
       } = req.params;
       const {
         products
       } = req.body;
+      await order.findByIdAndUpdate(orderId, { done: true }, { new: true })
       await User.findByIdAndUpdate(userId, { wasteFormStatus: true }, { new: true });
       const newWasteForm = await addWasteForm(
         userId,products
@@ -59,7 +61,7 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
         const product = newProducts[i];
   
         const existingProduct = wasteForm.products.find(p => p.product.equals(product.product));
-  
+      
         if (existingProduct) {
           existingProduct.quantityPerPerson = (existingProduct.quantityPerPerson+product.quantityPerPerson)/2;
         } else {
@@ -69,9 +71,9 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
   
       // Save the updated WasteForm document
       const updatedForm = await wasteForm.save();
-  
+      
       console.log(`WasteForm document with ID ${updatedForm._id} has been updated.`);
-  
+     
       return updatedForm;
     } catch (error) {
       console.error(`Error updating WasteForm document: ${error}`);
@@ -80,11 +82,12 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
   }
 
   module.exports.updateForm= async (req, res, next) => {
-    const{ _id } =req.params
+    const{ _id,orderId } =req.params
     const{products} =req.body
    try {
+    await Order.findByIdAndUpdate(orderId, { done: true })
     const wasteForm=addProductsToWasteForm(_id,products)
- 
+    
      res.json(wasteForm)
    } catch (err) {
      res.status(500).json({ message: err.message });
