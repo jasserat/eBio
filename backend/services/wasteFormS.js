@@ -98,7 +98,7 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
 
 module.exports.wasteForm = async (req, res) => {
     try {
-      const wasteFormAdd = await WasteForm.findOne({ userId: req.params.userId });
+      const wasteFormAdd = await wasteForm.findOne({ userId: req.params.userId });
       res.status(200).json(wasteFormAdd);
     } catch (error) {
       res.status(500).json({ message: error.message });
