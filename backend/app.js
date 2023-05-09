@@ -11,7 +11,7 @@ const orderRouter = require("./routes/orderR");
 const productRouter = require("./routes/productR");
 const userRouter = require("./routes/userR");
 const basketRouter = require("./routes/basketR")
-const WasteFormRouter = require("./routes/wasteFormR");
+const wasteFormRouter = require("./routes/wasteFormR");
 const questionRouter = require("./routes/questionsR");
 const appointmentRouter = require("./routes/appointmentR");
 const app = express();
@@ -31,7 +31,7 @@ app.use("/product", productRouter);
 app.use("/user", userRouter);
 app.use("/basket", basketRouter);
 app.use("/order", orderRouter);
-app.use('/wasteForm', WasteFormRouter);
+app.use('/wasteForm', wasteFormRouter);
 app.use("/questions", questionRouter);
 app.use("/appointments", appointmentRouter);
 app.use((req, res, next) => {
