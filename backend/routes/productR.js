@@ -16,6 +16,8 @@ router.get("/farmer", productS.getProductByFarmer);
 router.put("/edit/:id", productS.editProduct);
 // delete product
 router.delete("/delete/:id", productS.deleteProduct);
+//delete products
+router.delete("/deletes", productS.deleteProducts);
 // search product
 router.get("/productSearch/:search", productS.productSearch);
 // filter product by price

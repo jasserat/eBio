@@ -3,16 +3,12 @@ const Schema = mongoose.Schema;
 const products = require('./product');
 const basket = require('./basket');
 
-
 const StateEnum = {
     OnHold: 'On hold',
     Accepted: 'Accepted',
     Rejected: 'Rejected',
     OnTheWay : 'On the way'
   };
-
-
-  
 
   var Product = new Schema({
     productId :  {  
@@ -60,19 +56,30 @@ var Order = new Schema({
         unique: true
     },
 
+    somme :  {
+      type: Number
+  },
 
     consumptionDate :  {
         type: Date
     },
-     members : {
+     members : {  
         type: Number ,
         default:1
+
     }
     ,
     done:{
       type:Boolean,
       default:false
-    }
+    
+
+    },  
+    deliverySpot : {
+       type: String ,
+       default : 'bizerte'
+   }
+
 });
 
 

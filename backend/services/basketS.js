@@ -2,7 +2,7 @@
 const Basket = require('../models/basket');
 const Product = require('../models/product');
 const Order = require ('../models/order');
-const order = require('../models/order');
+
 
 //increase quantity in the basket
 module.exports.increaseQuantity = async (req,res) =>{
@@ -136,6 +136,27 @@ module.exports.addBasket = async (req, res) => {
   }
 };
 
+//update the state of the order
+module.exports.updateState = async (req, res) => {
+  const path = req.url;
+  console.log(path);
+
+  const idPattern = /\/updateState\/(\w+)/;
+  const match = path.match(idPattern);
+  const orderId = match[1];
+
+  const newState = "Accepted";
+  try {
+      const newOrder =  await Order.findByIdAndUpdate(orderId, { state : newState });
+    
+        const savedOrder= await newOrder.save();
+        res.json(savedOrder);
+      } catch (error) {
+        res.status(500).json({ error: 'Failed to change state' });
+      }
+
+    }
+  
 
 //show the bsket of a specific user
 module.exports.showBasket = async (req, res) => {
@@ -212,6 +233,12 @@ clearBasket = async() =>{
 
 // create the order and delete the basket f     or the user 
 module.exports.createOrder = async(req, res) => {
+  const consumptionDate = req.body.consumptionDate;
+  const members = req.body.members; 
+
+  const deliverySpot = req.body.deliverySpot; 
+  
+  console.log('deliverySpot:', req.body.deliverySpot);
   const path = req.url;
   console.log(path);
 
@@ -224,13 +251,10 @@ module.exports.createOrder = async(req, res) => {
   console.log(basket)
   const products = basket.products;
 
-  const totalPrice = products.reduce((acc, curr) => acc + curr.price * curr.quantity, 0);
+  const totalPrice = products.reduce((acc, curr) => acc + curr.price * curr.quantity, 0); 
+  
 
   
-   
-  const consumptionDate = req.body.consumptionDate;
-
-  const members = req.body.members; 
 
     // Create a new order based on the contents of the basket
     const order = new Order ({
@@ -239,9 +263,10 @@ module.exports.createOrder = async(req, res) => {
       state: 'On hold', // Initialize the order state to 'On Hold'
       ref: products,
       somme : totalPrice ,
-      consumptionDate,
-      members,
-    });
+      consumptionDate : consumptionDate ,
+      members : members ,
+      deliverySpot : deliverySpot ,
+    }); 
 
     try {
       const savedOrder = await order.save();

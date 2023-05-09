@@ -188,8 +188,11 @@ module.exports.login_post = async (req, res) => {
     //res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.tokenExpireTime * 1000 });
     res.status(200).json({ email, token });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const error =err.message;
+    console.log(error);
+    res.status(400).json({ error });
+    // const errors = handleErrors(err);
+    // res.status(400).json({ errors });
   }
 };
 
@@ -569,12 +572,13 @@ module.exports.authorizeUser = async (req, res, next) => {
   }
 };
 
+
 //reset password
 
+
 function makeid(length) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {
@@ -585,22 +589,14 @@ function makeid(length) {
 }
 
 async function sendEmail(email, subject, text) {
-  //token
+
+  
 
   try {
-    // create reusable transporter object using the default SMTP transport
-    // let transporter = nodemailer.createTransport({
-    //     host: "smtp.gmail.com",
-    //     port: 465,
-    //     secure: true, // true for 465, false for other ports
-    //     auth: {
-    //         user: "**", // generated ethereal user
-    //         pass: "**", // generated ethereal password
-    //     },
-    // });
+
 
     let mailOptions = {
-      from: '" eBio" <eBio.dev@gmail.com>', // sender address
+      from: '" eBio" <ebioapplication2222@gmail.com>', // sender address
       to: email, // list of receivers
       subject: subject, // Subject line
       text: text, // plain text body
@@ -609,33 +605,116 @@ async function sendEmail(email, subject, text) {
     // Send the email
     let info = await transporter.sendMail(mailOptions);
     console.log("Message sent: " + info.messageId);
+
   } catch (error) {
-    console.log(error);
+    console.log(error)
+  }
+
+}
++6
+
+//forget password 
+
+//forget password email
+  module.exports.forgetPassword = async (req, res) => {
+    try {
+
+      const email = req.body.email
+
+      const user = await User.findOne({ email }, { timeout: false })
+      if (!user) {
+        return res.status(400).json({ error: 'Email not found' });
+      }
+
+      
+      const code = makeid(6)
+
+      //sending email
+      await sendEmail(email, "PASSWORD RESET", "You are receiving this email because you (or someone else) have requested the reset of the password for your account Please click on the following link  or paste this into your browser to complete the process   " +
+        'http://localhost:3030/auth/newPass/' +
+        code  + "/"+ user._id +
+        '\n\n' +
+        'If you did not request this, please ignore this email and your password will remain unchanged.\n')
+
+
+
+
+      res.status(200).json({ message: "password reset email sent ,  here's the link http://localhost:3030/auth/newPass/" +code +"/" + user._id });
+    } catch (error) {
+      res.status(500).json({ message: "server problem" });
+    }
+  }
+
+
+//reset password
+module.exports.newPass = async (req, res) => {
+
+  try {
+    const path = req.url;
+    console.log(path)
+    
+    
+    const idPattern = /\/newPass\/(\w+)\/(\w+)/;
+    const match = path.match(idPattern);
+    const code = match[1];
+    const id = match[2];  
+    
+    const newPass = req.body.newPass
+
+
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPass, salt);
+      
+    await User.findByIdAndUpdate(id,{password : hashedPassword},{new : true})
+     
+    //const user = await User.findById(id)
+    
+
+    
+      
+    res.status(200).json({ message: 'Password reset successfully ' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }
 
-module.exports.resetPassword = (req, res) => {
-  const email = req.body.email;
 
-  const code = makeid(6);
-  res.json("http://loclahost:3000/user/newPass/" + code);
-  sendEmail(
-    email,
-    "PASSWORD RESET",
-    "To reset password please go to the link http://loclahost:3000/user/newPass/" +
-      code
-  );
+//reset a password
+module.exports.resetPassword = async (req, res) => {
 
-  //sendEmail(email,"PASSWORD RESET","c'est votre code"+code)
+  const path = req.url;
+  const idPattern = /\/resetPassword\/(\w+)/;
+  const idMatch = path.match(idPattern);
+  const id = idMatch[1];
+  console.log(id)
 
-  // res.json({received : "To reset password please go to the link http://loclahost:3000/user/newPass/"+ code})
-};
 
-module.exports.newPass = async (req, res) => {
-  const code = req.params.code;
-  const userId = req.body.userId;
-  const newPass = req.body.newPass;
+  const { currentPassword, newPassword } = req.body;
+  
+  try {
 
-  const user = await User.findByIdAndUpdate(userId, { password: newPass });
-  res.json(user);
+        
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+    
+    
+    //if (!isMatch)
+     if (currentPassword != user.password ){
+      return res.status(400).json({ message: 'Invalid current password' });
+    }
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    await sendEmail(user.email, "CONFIRMATION", "Hello, This is a confirmation that  your password  has just been changed");
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
