@@ -145,7 +145,7 @@ exports.getProductByFarmer = async (req, res) => {
       const { farmer } = req.query;
       const products = await product.find({
         farmer,
-      })
+      }).sort({date: -1})
         .populate("farmer");
       res.status(201).json(products);
     } catch (err) {
