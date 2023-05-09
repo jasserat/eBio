@@ -15,11 +15,10 @@ const basketRouter = require("./routes/basketR")
 const questionRouter = require("./routes/questionsR");
 const appointmentRouter = require("./routes/appointmentR");
 const app = express();
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
 app.use(logger("dev"));
 app.use(express.json());
 app.use(cookieParser());
