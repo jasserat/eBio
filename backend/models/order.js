@@ -55,20 +55,31 @@ var Order = new Schema({
         required: true,
         unique: true
     },
+
     somme :  {
       type: Number
   },
+
     consumptionDate :  {
         type: Date
     },
      members : {  
         type: Number ,
         default:1
+
+    }
+    ,
+    done:{
+      type:Boolean,
+      default:false
+    
+
     },  
     deliverySpot : {
        type: String ,
        default : 'bizerte'
    }
+
 });
 
 
