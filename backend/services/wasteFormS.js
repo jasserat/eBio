@@ -1,13 +1,13 @@
 
-const WasteForm = require("../models/wasteForm");
-const User = require("../models/user");
-const Order = require('../models/order');
+const wasteForm = require("../models/wasteForm");
+const user = require("../models/user");
+const order = require('../models/order');
 
 async function addWasteForm(userId, products) {
     try {
         // Create new Form
        
-          const newWasteForm = new WasteForm({
+          const newWasteForm = new wasteForm({
             userId,products
           })
           const savedWasteForm = await newWasteForm.save();
@@ -33,7 +33,7 @@ async function addWasteForm(userId, products) {
         products
       } = req.body;
       await order.findByIdAndUpdate(orderId, { done: true }, { new: true })
-      await User.findByIdAndUpdate(userId, { wasteFormStatus: true }, { new: true });
+      await user.findByIdAndUpdate(userId, { wasteFormStatus: true }, { new: true });
       const newWasteForm = await addWasteForm(
         userId,products
       );
@@ -51,7 +51,7 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
     try {
       // Find the WasteForm document by ID
       
-      const wasteForm = await WasteForm.findOne({ userId: wasteFormId });
+      const wasteForm = await wasteForm.findOne({ userId: wasteFormId });
       if (!wasteForm) {
         throw new Error(`WasteForm with ID ${wasteFormId} not found`);
       }
@@ -85,10 +85,10 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
     const{ _id,orderId } =req.params
     const{products} =req.body
    try {
-    await Order.findByIdAndUpdate(orderId, { done: true })
-    const wasteForm=addProductsToWasteForm(_id,products)
+    await order.findByIdAndUpdate(orderId, { done: true })
+    const wasteFormAdd=addProductsToWasteForm(_id,products)
     
-     res.json(wasteForm)
+     res.json(wasteFormAdd)
    } catch (err) {
      res.status(500).json({ message: err.message });
    }
@@ -98,8 +98,8 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
 
 module.exports.wasteForm = async (req, res) => {
     try {
-      const wasteForm = await WasteForm.findOne({ userId: req.params.userId });
-      res.status(200).json(wasteForm);
+      const wasteFormAdd = await WasteForm.findOne({ userId: req.params.userId });
+      res.status(200).json(wasteFormAdd);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
