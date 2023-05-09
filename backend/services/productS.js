@@ -2,7 +2,7 @@ const product = require('../models/product');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
 const cloudinary = require('../utils/cloudinary');
-const axios = require('axios');
+const { scrapeImage } = require('./imageScraping');
 
 
 const transporter = nodemailer.createTransport({
@@ -72,12 +72,7 @@ module.exports.addProduct = async (req, res) => {
       publicId = uploadResult.public_id;
     } else {
       // Recherche d'image sur Unsplash en utilisant le nom du produit
-      const response = await axios.get(`https://api.unsplash.com/search/photos?query=${name}`, {
-        headers: {
-          Authorization: 'Client-ID N6BO5Z57_HtYp-AzWgmt90Rdzy6SqQIzPwtk7DMgmM8'
-        }
-      });
-      imageUrl = response.data.results[0].urls.regular;
+      imageUrl = await scrapeImage(name);
 
       // Téléchargement de l'image sur Cloudinary
       const uploadResult = await cloudinary.uploader.upload(imageUrl, {
@@ -196,7 +191,7 @@ module.exports.deleteProduct = async (req, res) => {
     const productToDelete = await product.findById(productId);
 
     if (!productToDelete) {
-      return res.status(404).json({ message: 'Produit non trouvé' });
+      return res.status(404).json({ message: 'Product not found' });
     }
 
     // Supprimer l'image de Cloudinary si elle existe
@@ -207,7 +202,7 @@ module.exports.deleteProduct = async (req, res) => {
     // Supprimer le produit de la base de données
     await product.findByIdAndDelete(productId);
 
-    res.status(200).json({ message: 'Produit supprimé avec succès' });
+    res.status(200).json({ message: `${productToDelete.name} deleted successfully` });
   } catch (error) {
     res.status(400).json(error);
   }
@@ -222,6 +217,16 @@ module.exports.productSearch = async (req, res) => {
         res.status(400).json(error);
     }
 }
+
+module.exports.deleteProducts = async (req, res) => {
+  const { ids } = req.body;
+  try {
+    const result = await Product.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ message: `${result.deletedCount} products deleted successfully` });
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
 
 //filter products by price min and max
 module.exports.productFilter = async (req, res) => {
