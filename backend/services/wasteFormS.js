@@ -70,7 +70,7 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
       }
   
       // Save the updated WasteForm document
-      const updatedForm = await wasteForm.save();
+      const updatedForm = await wasteFormAddd.save();
       
       console.log(`WasteForm document with ID ${updatedForm._id} has been updated.`);
      
