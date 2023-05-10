@@ -51,8 +51,8 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
     try {
       // Find the WasteForm document by ID
       
-      const wasteForm = await wasteForm.findOne({ userId: wasteFormId });
-      if (!wasteForm) {
+      const wasteFormAddd = await wasteForm.findOne({ userId: wasteFormId });
+      if (!wasteFormAddd) {
         throw new Error(`WasteForm with ID ${wasteFormId} not found`);
       }
   
@@ -60,12 +60,12 @@ async function addProductsToWasteForm(wasteFormId, newProducts) {
       for (let i = 0; i < newProducts.length; i++) {
         const product = newProducts[i];
   
-        const existingProduct = wasteForm.products.find(p => p.product.equals(product.product));
+        const existingProduct = wasteFormAddd.products.find(p => p.product.equals(product.product));
       
         if (existingProduct) {
           existingProduct.quantityPerPerson = (existingProduct.quantityPerPerson+product.quantityPerPerson)/2;
         } else {
-          wasteForm.products.push(product);
+          wasteFormAddd.products.push(product);
         }
       }
   
